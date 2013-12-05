@@ -79,7 +79,9 @@ namespace Sniffer
             comboBox1.DataSource = cboItems1;
         }
 
-
+        /// <summary>
+        /// 抓包线程
+        /// </summary>
         private void threadHandler()
         {
             this.device.Open(DeviceMode.Promiscuous, this.readTimeoutMilliseconds);
@@ -111,7 +113,7 @@ namespace Sniffer
             string color = "";
 
             var packet = PacketDotNet.Packet.ParsePacket(pPacket); //Raw基础包对象
-
+            Console.WriteLine(packet.Bytes.ToString());
             color = "White";
 
             if (layer == PacketDotNet.LinkLayers.Ethernet) //以太网包
@@ -132,6 +134,10 @@ namespace Sniffer
                 {
                     info = "Ethernet packet: " + ethernetPacket.ToColoredString(false);
                 }
+                else 
+                {
+                    info = "IpV6";
+                }
                  
                 
             }
@@ -150,6 +156,9 @@ namespace Sniffer
 
                     protocol = "TCP";
                     protocol = (destPort == 23) ? "TELNET" : protocol;
+                    protocol = (destPort == 80) ? "HTTP" : protocol;
+                    protocol = (destPort == 21) ? "FTP" : protocol;
+                    protocol = (destPort == 20) ? "FTP-DATA" : protocol;
 
                     //info = "TCP packet: " + tcpPacket.ToColoredString(false);
                     info = "TCP packet: " + tcpPacket.ToString();
@@ -183,7 +192,9 @@ namespace Sniffer
                 this.dataGridView1.Rows[index].Cells[4].Value = info;
             }
         }
-
+        /// <summary>
+        /// 抓包后更新UI显示
+        /// </summary>
         private void setDataGridView(string time, string srcIp, string destIp, string protocol, string info, string color)  //当跨线程调用时，调用该方法进行UI界面更新
         {
             int index = this.dataGridView1.Rows.Add();
