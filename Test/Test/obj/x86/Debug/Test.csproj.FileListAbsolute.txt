@@ -1,0 +1,9 @@
+C:\Users\Cole\Desktop\C#\Test\Test\bin\Debug\Test.exe
+C:\Users\Cole\Desktop\C#\Test\Test\bin\Debug\Test.pdb
+C:\Users\Cole\Desktop\C#\Test\Test\bin\Debug\PacketDotNet.dll
+C:\Users\Cole\Desktop\C#\Test\Test\bin\Debug\SharpPcap.dll
+C:\Users\Cole\Desktop\C#\Test\Test\bin\Debug\PacketDotNet.xml
+C:\Users\Cole\Desktop\C#\Test\Test\bin\Debug\SharpPcap.xml
+C:\Users\Cole\Desktop\C#\Test\Test\obj\x86\Debug\Test.csprojResolveAssemblyReference.cache
+C:\Users\Cole\Desktop\C#\Test\Test\obj\x86\Debug\Test.exe
+C:\Users\Cole\Desktop\C#\Test\Test\obj\x86\Debug\Test.pdb

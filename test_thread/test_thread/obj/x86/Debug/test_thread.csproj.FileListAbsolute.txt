@@ -1,0 +1,7 @@
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\bin\Debug\test_thread.exe
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\bin\Debug\test_thread.pdb
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\obj\x86\Debug\test_thread.Form1.resources
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\obj\x86\Debug\test_thread.Properties.Resources.resources
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\obj\x86\Debug\test_thread.csproj.GenerateResource.Cache
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\obj\x86\Debug\test_thread.exe
+C:\Users\Cole\Desktop\C#\test_thread\test_thread\obj\x86\Debug\test_thread.pdb
