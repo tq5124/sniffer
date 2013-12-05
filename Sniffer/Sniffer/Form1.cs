@@ -113,7 +113,9 @@ namespace Sniffer
             string color = "";
 
             var packet = PacketDotNet.Packet.ParsePacket(pPacket); //Raw基础包对象
-            Console.WriteLine(packet.Bytes.ToString());
+            //Raw基础包详细数据的输出，为解析包作准备
+            foreach (byte b in packet.Bytes)
+                Console.WriteLine("{0}", Convert.ToString(b, 16).ToUpper().PadLeft(2, '0'));
             color = "White";
 
             if (layer == PacketDotNet.LinkLayers.Ethernet) //以太网包
