@@ -18,10 +18,9 @@ namespace Sniffer
         {
             InitializeComponent();
             combox1_Ini();
-            //测试用，不安全
-            //Control.CheckForIllegalCrossThreadCalls = false;
         }
 
+        //抓包线程
         private delegate void setDataGridViewDelegate(string time, string srcIp, string destIp, string protocol, string info, string color);
 
         private LivePcapDevice device;
@@ -41,27 +40,11 @@ namespace Sniffer
 
             Thread newThread = new Thread(new ThreadStart(threadHandler));
             newThread.Start();
-
-            /*
-            device.Open(DeviceMode.Promiscuous, readTimeoutMilliseconds);
-            device.SetFilter(filter);
-            device.Mode = CaptureMode.Packets; //抓数据包
-            device.OnPacketArrival += new PacketArrivalEventHandler(device_OnPacketArrival); //抓数据包回调事件
-            //开始监听
-            device.StartCapture();
-            
-            */
- 
-            /*
-            int index = this.dataGridView1.Rows.Add();
-            this.dataGridView1.Rows[index].Cells[0].Value = "1";
-            this.dataGridView1.Rows[index].Cells[1].Value = "2";
-            this.dataGridView1.Rows[index].Cells[2].Value = "3";
-            this.dataGridView1.Rows[index].Cells[3].Value = "4";
-            this.dataGridView1.Rows[index].Cells[4].Value = "5";
-             */
         }
 
+        /// <summary>
+        /// 关闭程序
+        /// </summary>
         private void button7_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -140,8 +123,6 @@ namespace Sniffer
                 srcIp = srcMac.ToString();
                 destIp = destMac.ToString();
 
-                //MessageBox.Show(ethernetPacket.Type.ToString());
-                //info = "Ethernet packet: " + ethernetPacket.ToColoredString(false);
                 protocol = ethernetPacket.Type.ToString().ToUpper();
                 if (protocol == "ARP") 
                 {
@@ -159,6 +140,7 @@ namespace Sniffer
             {
                 srcIp = ipPacket.SourceAddress.ToString();
                 destIp = ipPacket.DestinationAddress.ToString();
+                protocol = ipPacket.Protocol.ToString();
 
                 var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(packet); //TCP包
                 if (tcpPacket != null)
@@ -167,6 +149,8 @@ namespace Sniffer
                     int destPort = tcpPacket.DestinationPort;
 
                     protocol = "TCP";
+                    protocol = (destPort == 23) ? "TELNET" : protocol;
+
                     //info = "TCP packet: " + tcpPacket.ToColoredString(false);
                     info = "TCP packet: " + tcpPacket.ToString();
                 }
@@ -198,14 +182,6 @@ namespace Sniffer
                 this.dataGridView1.Rows[index].Cells[3].Value = protocol;
                 this.dataGridView1.Rows[index].Cells[4].Value = info;
             }
-            /*
-            int index = this.dataGridView1.Rows.Add();
-            this.dataGridView1.Rows[index].Cells[0].Value = time;
-            this.dataGridView1.Rows[index].Cells[1].Value = len;
-            this.dataGridView1.Rows[index].Cells[2].Value = layer;
-            this.dataGridView1.Rows[index].Cells[3].Value = "4";
-            this.dataGridView1.Rows[index].Cells[4].Value = "5";
-            */
         }
 
         private void setDataGridView(string time, string srcIp, string destIp, string protocol, string info, string color)  //当跨线程调用时，调用该方法进行UI界面更新
