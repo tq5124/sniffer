@@ -21,14 +21,19 @@ namespace Sniffer
         }
 
         //抓包线程
-        private delegate void setDataGridViewDelegate(string time, string srcIp, string destIp, string protocol, string info, string color);
+        private delegate void setDataGridViewDelegate(packet Packet,int index);
 
         private LivePcapDevice device;
         private int readTimeoutMilliseconds;
         private string filter;
+        //抓到的所有包的所有信息
+        private ArrayList packets;
 
         private void button1_Click(object sender, EventArgs e)
         {
+            //清除之前的数据
+            this.packets = new ArrayList();
+            this.dataGridView1.Rows.Clear();
             //读取要监听的网卡
             int eth = System.Int32.Parse(this.comboBox1.SelectedValue.ToString());
             var devices = LivePcapDeviceList.Instance;
@@ -114,8 +119,10 @@ namespace Sniffer
 
             var packet = PacketDotNet.Packet.ParsePacket(pPacket); //Raw基础包对象
             //Raw基础包详细数据的输出，为解析包作准备
+            /*
             foreach (byte b in packet.Bytes)
                 Console.WriteLine("{0}", Convert.ToString(b, 16).ToUpper().PadLeft(2, '0'));
+            */
             color = "White";
 
             if (layer == PacketDotNet.LinkLayers.Ethernet) //以太网包
@@ -178,35 +185,41 @@ namespace Sniffer
                 }
             }
 
+            packet temp = new packet(time,srcIp,destIp,protocol,info,color);
+            packets.Add(temp);
+
             if (this.dataGridView1.InvokeRequired)
             {
-                this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] {time, srcIp, destIp, protocol, info, color});
+                //this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] {time, srcIp, destIp, protocol, info, color});
+                this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] {temp,packets.Count-1});
             }
             else
             {
                 int index = this.dataGridView1.Rows.Add();
                 this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(color);
 
-                this.dataGridView1.Rows[index].Cells[0].Value = time;
-                this.dataGridView1.Rows[index].Cells[1].Value = srcIp;
-                this.dataGridView1.Rows[index].Cells[2].Value = destIp;
-                this.dataGridView1.Rows[index].Cells[3].Value = protocol;
-                this.dataGridView1.Rows[index].Cells[4].Value = info;
+                this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
+                this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
+                this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
+                this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
+                this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
+                this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
             }
         }
         /// <summary>
         /// 抓包后更新UI显示
         /// </summary>
-        private void setDataGridView(string time, string srcIp, string destIp, string protocol, string info, string color)  //当跨线程调用时，调用该方法进行UI界面更新
+        private void setDataGridView(packet Packet,int packet_index)  //当跨线程调用时，调用该方法进行UI界面更新
         {
             int index = this.dataGridView1.Rows.Add();
-            this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(color);
+            this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(Packet.color);
 
-            this.dataGridView1.Rows[index].Cells[0].Value = time;
-            this.dataGridView1.Rows[index].Cells[1].Value = srcIp;
-            this.dataGridView1.Rows[index].Cells[2].Value = destIp;
-            this.dataGridView1.Rows[index].Cells[3].Value = protocol;
-            this.dataGridView1.Rows[index].Cells[4].Value = info;   
+            this.dataGridView1.Rows[index].Cells[0].Value = Packet.time;
+            this.dataGridView1.Rows[index].Cells[1].Value = Packet.srcIp;
+            this.dataGridView1.Rows[index].Cells[2].Value = Packet.destIp;
+            this.dataGridView1.Rows[index].Cells[3].Value = Packet.protocol;
+            this.dataGridView1.Rows[index].Cells[4].Value = Packet.info;
+            this.dataGridView1.Rows[index].Cells[5].Value = packet_index;
         }
 
         /// <summary>
@@ -216,5 +229,38 @@ namespace Sniffer
         {
             this.device.StopCapture();
         }
+    }
+
+
+
+    public class packet
+    {
+        public string time;
+        public string srcIp;
+        public string destIp;
+        public string protocol;
+        public string info;
+        public string color;
+
+        public packet()
+        {
+            this.time = "";
+            this.srcIp = "";
+            this.destIp = "";
+            this.protocol = "";
+            this.info = "";
+            this.color = "";
+        }
+
+        public packet(string time, string srcIp, string destIp, string protocol, string info, string color)
+        {
+            this.time = time;
+            this.srcIp = srcIp;
+            this.destIp = destIp;
+            this.protocol = protocol;
+            this.info = info;
+            this.color = color;
+        }
+
     }
 }
