@@ -229,6 +229,17 @@ namespace Sniffer
         {
             this.device.StopCapture();
         }
+
+        private void dataGridView_row_click(object sender, EventArgs e)
+        {
+            int index = int.Parse(this.dataGridView1.CurrentRow.Cells[5].Value.ToString());
+            packet Packet = (packet)this.packets[index];
+
+            string test = Packet.time + Packet.srcIp + Packet.destIp + Packet.protocol + Packet.info + Packet.color;
+
+            this.listBox1.Items.Clear();
+            this.listBox1.Items.Add(test);
+        }
     }
 
 
