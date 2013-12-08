@@ -185,7 +185,7 @@ namespace Sniffer
                 }
             }
 
-            packet temp = new packet(time,srcIp,destIp,protocol,info,color);
+            packet temp = new packet(time,srcIp,destIp,protocol,info,color,packet);
             packets.Add(temp);
 
             if (this.dataGridView1.InvokeRequired)
@@ -235,10 +235,28 @@ namespace Sniffer
             int index = int.Parse(this.dataGridView1.CurrentRow.Cells[5].Value.ToString());
             packet Packet = (packet)this.packets[index];
 
-            string test = Packet.time + Packet.srcIp + Packet.destIp + Packet.protocol + Packet.info + Packet.color;
+            //string test = Packet.time + Packet.srcIp + Packet.destIp + Packet.protocol + Packet.info + Packet.color;
 
             this.listBox1.Items.Clear();
-            this.listBox1.Items.Add(test);
+
+            //物理层
+            this.listBox1.Items.Add(Packet.frame_info);
+            this.listBox1.Items.Add("");
+            //以太网层
+            this.listBox1.Items.Add(Packet.ethernet_info);
+            this.listBox1.Items.Add("");
+            //IP层
+            if (Packet.ip_info.Count > 0)
+            {
+                foreach (string s in Packet.ip_info)
+                {
+                    this.listBox1.Items.Add(s);
+                }
+            }
+            /*
+            foreach (byte b in Packet.rPacket.Bytes)
+                this.listBox1.Items.Add(Convert.ToString(b, 16).ToUpper().PadLeft(2, '0'));    
+            */ 
         }
     }
 
@@ -252,6 +270,11 @@ namespace Sniffer
         public string protocol;
         public string info;
         public string color;
+        public PacketDotNet.Packet rPacket;
+
+        public string frame_info;
+        public string ethernet_info;
+        public ArrayList ip_info;
 
         public packet()
         {
@@ -263,7 +286,7 @@ namespace Sniffer
             this.color = "";
         }
 
-        public packet(string time, string srcIp, string destIp, string protocol, string info, string color)
+        public packet(string time, string srcIp, string destIp, string protocol, string info, string color, PacketDotNet.Packet rPacket)
         {
             this.time = time;
             this.srcIp = srcIp;
@@ -271,6 +294,41 @@ namespace Sniffer
             this.protocol = protocol;
             this.info = info;
             this.color = color;
+            this.rPacket = rPacket;
+
+            analysis_packet();
+        }
+
+        public void analysis_packet() 
+        {
+            this.frame_info = "Frame: " + this.rPacket.Bytes.Length.ToString() + " bytes";
+
+            var ethernetPacket = (PacketDotNet.EthernetPacket) this.rPacket; //以太网层包
+            System.Net.NetworkInformation.PhysicalAddress srcMac = ethernetPacket.SourceHwAddress;
+            System.Net.NetworkInformation.PhysicalAddress destMac = ethernetPacket.DestinationHwAddress;
+            this.ethernet_info = "srcMac: " + srcMac + " destMac: " + destMac;
+
+            var ipPacket = PacketDotNet.IpPacket.GetEncapsulated(this.rPacket);  //IP包
+            this.ip_info = new ArrayList();
+            if (ipPacket != null)
+            {
+                this.ip_info.Add("Version(版本): " + ipPacket.Version);
+                this.ip_info.Add("Header Length(头长度): " + ipPacket.HeaderLength * 4);
+                this.ip_info.Add("Differentiated Services Field(区分服务): 0x" + Convert.ToString(ipPacket.Bytes[1], 16).ToUpper().PadLeft(2, '0'));
+                this.ip_info.Add("Total Length(总长度): " + ipPacket.TotalLength);
+                this.ip_info.Add("Identification(标识): 0x" + Convert.ToString(ipPacket.Bytes[4], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[5], 16).ToUpper().PadLeft(2, '0'));
+                this.ip_info.Add("DF: " + ((ipPacket.Bytes[6] & 64) >> 6));
+                this.ip_info.Add("MF: " + ((ipPacket.Bytes[6] & 32) >> 5));
+                //分段偏移量,待测试检验
+                //this.ip_info.Add("Fragment offset(分段偏移量): " + "to be continued");
+                this.ip_info.Add("Fragment offset(分段偏移量): " + ((Convert.ToInt32(ipPacket.Bytes[6] & 31) << 8) + Convert.ToInt32(ipPacket.Bytes[7])).ToString());
+                //
+                this.ip_info.Add("Time to live(生存期): " + ipPacket.TimeToLive);
+                this.ip_info.Add("Protocol(协议): " + ipPacket.Protocol);
+                this.ip_info.Add("Header checksum(头部校验和): 0x" + Convert.ToString(ipPacket.Bytes[10], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[11], 16).ToUpper().PadLeft(2, '0'));
+                this.ip_info.Add("Source(源地址): " + ipPacket.SourceAddress);
+                this.ip_info.Add("Destination(目的地址): " + ipPacket.DestinationAddress);
+            }
         }
 
     }
