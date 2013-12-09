@@ -247,6 +247,7 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(frame_info);
             }
+            //数据链路层
             //以太网层
             if (Packet.ethernet_info.Count > 0)
             {
@@ -257,6 +258,7 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(ethernet_info);
             }
+            //网络层
             //IP包
             if (Packet.ip_info.Count > 0)
             {
@@ -277,6 +279,7 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(arp_info);
             }
+            //传输层
             //ICMP包
             if (Packet.icmp_info.Count > 0)
             {
@@ -287,6 +290,16 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(icmp_info);
             }
+            //IGMP包
+            if (Packet.igmp_info.Count > 0)
+            {
+                TreeNode igmp_info = new TreeNode("IGMP : ");
+                foreach (KeyValuePair<string, string> item in Packet.igmp_info)
+                {
+                    igmp_info.Nodes.Add(item.Key + " : " + item.Value);
+                }
+                this.treeView1.Nodes.Add(igmp_info);
+            } 
             //TCP包
             if (Packet.tcp_info.Count > 0)
             {
@@ -296,6 +309,16 @@ namespace Sniffer
                     tcp_info.Nodes.Add(item.Key + " : " + item.Value);
                 }
                 this.treeView1.Nodes.Add(tcp_info);
+            }
+            //UDP包
+            if (Packet.udp_info.Count > 0)
+            {
+                TreeNode udp_info = new TreeNode("UDP : ");
+                foreach (KeyValuePair<string, string> item in Packet.udp_info)
+                {
+                    udp_info.Nodes.Add(item.Key + " : " + item.Value);
+                }
+                this.treeView1.Nodes.Add(udp_info);
             }
         }
     }
@@ -424,7 +447,7 @@ namespace Sniffer
                                 var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(this.rPacket);
                                 this.tcp_info.Add("SourcePort(源端口)", tcpPacket.SourcePort.ToString());
                                 this.tcp_info.Add("DestinationPort(目的端口)", tcpPacket.DestinationPort.ToString());
-                                //与wireshark不符，待完成
+                                //与wireshark不符，应该是wireshark特有的relative功能，待确认
                                 this.tcp_info.Add("SequenceNumber(序号)", tcpPacket.SequenceNumber.ToString());
                                 //
                                 this.tcp_info.Add("(确认序号)",tcpPacket.AcknowledgmentNumber.ToString());
@@ -436,10 +459,17 @@ namespace Sniffer
                                 this.tcp_info.Add("SYN", tcpPacket.Syn.ToString());
                                 this.tcp_info.Add("FIN", tcpPacket.Fin.ToString());
                                 this.tcp_info.Add("WindowSize(窗口)", tcpPacket.WindowSize.ToString());
-                                //待改为16进制
-                                this.tcp_info.Add("Checksum(校验和)",tcpPacket.Checksum.ToString());
-                                //
+                                this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(2, '0'));
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
+                                this.tcp_info.Add("Option(可选部分)", "to be continued");
+                            }
+                            else if (ipPacket.Protocol.ToString() == "UDP")
+                            { 
+                                var udpPacket = PacketDotNet.UdpPacket.GetEncapsulated(this.rPacket);
+                                this.udp_info.Add("SourcePort(源端口)", udpPacket.SourcePort.ToString());
+                                this.udp_info.Add("DestinationPort(目的端口)", udpPacket.DestinationPort.ToString());
+                                this.udp_info.Add("Length(报文长度)",udpPacket.Length.ToString());
+                                this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(2, '0'));
                             }
                         }
                         //IpV6
