@@ -257,7 +257,7 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(ethernet_info);
             }
-            //IP层
+            //IP包
             if (Packet.ip_info.Count > 0)
             {
                 TreeNode ip_info = new TreeNode("IP : ");
@@ -266,6 +266,36 @@ namespace Sniffer
                     ip_info.Nodes.Add(item.Key + " : " + item.Value);
                 }
                 this.treeView1.Nodes.Add(ip_info);
+            }
+            //ARP包
+            if (Packet.arp_info.Count > 0)
+            {
+                TreeNode arp_info = new TreeNode("ARP : ");
+                foreach (KeyValuePair<string, string> item in Packet.arp_info)
+                {
+                    arp_info.Nodes.Add(item.Key + " : " + item.Value);
+                }
+                this.treeView1.Nodes.Add(arp_info);
+            }
+            //ICMP包
+            if (Packet.icmp_info.Count > 0)
+            {
+                TreeNode icmp_info = new TreeNode("ICMP : ");
+                foreach (KeyValuePair<string, string> item in Packet.icmp_info)
+                {
+                    icmp_info.Nodes.Add(item.Key + " : " + item.Value);
+                }
+                this.treeView1.Nodes.Add(icmp_info);
+            }
+            //TCP包
+            if (Packet.tcp_info.Count > 0)
+            {
+                TreeNode tcp_info = new TreeNode("TCP : ");
+                foreach (KeyValuePair<string, string> item in Packet.tcp_info)
+                {
+                    tcp_info.Nodes.Add(item.Key + " : " + item.Value);
+                }
+                this.treeView1.Nodes.Add(tcp_info);
             }
         }
     }
@@ -285,7 +315,14 @@ namespace Sniffer
 
         public Dictionary<string, string> frame_info;
         public Dictionary<string, string> ethernet_info;
+
         public Dictionary<string,string> ip_info;
+        public Dictionary<string, string> arp_info;
+
+        public Dictionary<string, string> icmp_info;
+        public Dictionary<string, string> igmp_info;
+        public Dictionary<string, string> tcp_info;
+        public Dictionary<string, string> udp_info;
 
         public packet()
         {
@@ -295,6 +332,7 @@ namespace Sniffer
             this.protocol = "";
             this.info = "";
             this.color = "";
+
         }
 
         public packet(string time, string srcIp, string destIp, string protocol, string info, string color, PacketDotNet.RawPacket pPacket)
@@ -307,43 +345,146 @@ namespace Sniffer
             this.color = color;
             this.rPacket = PacketDotNet.Packet.ParsePacket(pPacket);
             this.layer = pPacket.LinkLayerType;
+
             this.frame_info = new Dictionary<string, string>();
             this.ethernet_info = new Dictionary<string, string>();
+
             this.ip_info = new Dictionary<string, string>();
+            this.arp_info = new Dictionary<string, string>();
+
+            this.icmp_info = new Dictionary<string, string>();
+            this.igmp_info = new Dictionary<string, string>();
+            this.tcp_info = new Dictionary<string, string>();
+            this.udp_info = new Dictionary<string, string>();
 
             analysis_packet();
         }
 
         public void analysis_packet() 
         {
+            //物理层信息
             this.frame_info.Add("Frame",this.rPacket.Bytes.Length.ToString() + " bytes");
-
             if (this.layer == PacketDotNet.LinkLayers.Ethernet) //以太网包
             {
-                var ethernetPacket = (PacketDotNet.EthernetPacket)this.rPacket; //以太网层包
-                System.Net.NetworkInformation.PhysicalAddress srcMac = ethernetPacket.SourceHwAddress;
-                System.Net.NetworkInformation.PhysicalAddress destMac = ethernetPacket.DestinationHwAddress;
-                this.ethernet_info.Add("srcMac",srcMac.ToString());
-                this.ethernet_info.Add("destMac", destMac.ToString());
-            }
-            var ipPacket = PacketDotNet.IpPacket.GetEncapsulated(this.rPacket);  //IP包
-            if (ipPacket != null)
-            {
-                this.ip_info.Add("Version(版本)",ipPacket.Version.ToString());
-                this.ip_info.Add("Header Length(头长度)",(ipPacket.HeaderLength * 4).ToString());
-                this.ip_info.Add("Differentiated Services Field(区分服务)","0x" + Convert.ToString(ipPacket.Bytes[1], 16).ToUpper().PadLeft(2, '0'));
-                this.ip_info.Add("Total Length(总长度)",ipPacket.TotalLength.ToString());
-                this.ip_info.Add("Identification(标识)","0x" + Convert.ToString(ipPacket.Bytes[4], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[5], 16).ToUpper().PadLeft(2, '0'));
-                this.ip_info.Add("DF",((ipPacket.Bytes[6] & 64) >> 6).ToString());
-                this.ip_info.Add("MF",((ipPacket.Bytes[6] & 32) >> 5).ToString());
-                //分段偏移量,待测试检验
-                this.ip_info.Add("Fragment offset(分段偏移量)",((Convert.ToInt32(ipPacket.Bytes[6] & 31) << 8) + Convert.ToInt32(ipPacket.Bytes[7])).ToString());
-                //
-                this.ip_info.Add("Time to live(生存期)",ipPacket.TimeToLive.ToString());
-                this.ip_info.Add("Protocol(协议)",ipPacket.Protocol.ToString());
-                this.ip_info.Add("Header checksum(头部校验和)","0x" + Convert.ToString(ipPacket.Bytes[10], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[11], 16).ToUpper().PadLeft(2, '0'));
-                this.ip_info.Add("Source(源地址)",ipPacket.SourceAddress.ToString());
-                this.ip_info.Add("Destination(目的地址)",ipPacket.DestinationAddress.ToString());
+                //以太网包解析
+                var ethernetPacket = (PacketDotNet.EthernetPacket)this.rPacket;
+                this.ethernet_info.Add("srcMac(MAC源地址)", ethernetPacket.SourceHwAddress.ToString());
+                this.ethernet_info.Add("destMac(MAC目标地址)", ethernetPacket.DestinationHwAddress.ToString());
+                this.ethernet_info.Add("Type(以太类型)", ethernetPacket.Type.ToString());
+
+                if (ethernetPacket.Type.ToString() == "IpV4" || ethernetPacket.Type.ToString() == "IpV6")
+                {
+                    //IP包解析
+                    var ipPacket = PacketDotNet.IpPacket.GetEncapsulated(this.rPacket);
+                    if (ipPacket != null)
+                    {
+                        this.ip_info.Add("Version(版本)", ipPacket.Version.ToString());
+                        this.ip_info.Add("Header Length(头长度)", (ipPacket.HeaderLength * 4).ToString());
+                        this.ip_info.Add("Differentiated Services Field(区分服务)", "0x" + Convert.ToString(ipPacket.Bytes[1], 16).ToUpper().PadLeft(2, '0'));
+                        this.ip_info.Add("Total Length(总长度)", ipPacket.TotalLength.ToString());
+                        this.ip_info.Add("Identification(标识)", "0x" + Convert.ToString(ipPacket.Bytes[4], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[5], 16).ToUpper().PadLeft(2, '0'));
+                        this.ip_info.Add("DF", ((ipPacket.Bytes[6] & 64) >> 6).ToString());
+                        this.ip_info.Add("MF", ((ipPacket.Bytes[6] & 32) >> 5).ToString());
+                        //分段偏移量,待测试检验
+                        this.ip_info.Add("Fragment offset(分段偏移量)", ((Convert.ToInt32(ipPacket.Bytes[6] & 31) << 8) + Convert.ToInt32(ipPacket.Bytes[7])).ToString());
+                        //
+                        this.ip_info.Add("Time to live(生存期)", ipPacket.TimeToLive.ToString());
+                        this.ip_info.Add("Protocol(协议)", ipPacket.Protocol.ToString());
+                        this.ip_info.Add("Header checksum(头部校验和)", "0x" + Convert.ToString(ipPacket.Bytes[10], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[11], 16).ToUpper().PadLeft(2, '0'));
+                        this.ip_info.Add("Source(源地址)", ipPacket.SourceAddress.ToString());
+                        this.ip_info.Add("Destination(目的地址)", ipPacket.DestinationAddress.ToString());
+
+                        //IpV4
+                        if (ipPacket.Version.ToString() == "IPv4")
+                        {
+                            //ICMP包解析
+                            if (ipPacket.Protocol.ToString() == "ICMP")
+                            {
+                                var icmpPacket = PacketDotNet.ICMPv4Packet.GetEncapsulated(this.rPacket);
+                                this.icmp_info.Add("TypeCode(类型)",icmpPacket.TypeCode.ToString());
+                                //待改为16进制
+                                this.icmp_info.Add("Checksum(校验和)",icmpPacket.Checksum.ToString());
+                                //
+                                this.icmp_info.Add("Identifier(标识符)", icmpPacket.ID.ToString());
+                                this.icmp_info.Add("Sequence(序列号)", icmpPacket.Sequence.ToString());
+                            }
+
+                            //IGMP包解析,待完成
+                            /*
+                            if (ipPacket.Protocol.ToString() == "IGMP")
+                            {
+                                var tcpPacket = PacketDotNet.IGMPv2Packet.ParsePacket(this.rPacket);
+                            }
+                            */
+                            //
+
+                            //TCP包解析
+                            if (ipPacket.Protocol.ToString() == "TCP")
+                            {
+                                var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(this.rPacket);
+                                this.tcp_info.Add("SourcePort(源端口)", tcpPacket.SourcePort.ToString());
+                                this.tcp_info.Add("DestinationPort(目的端口)", tcpPacket.DestinationPort.ToString());
+                                //与wireshark不符，待完成
+                                this.tcp_info.Add("SequenceNumber(序号)", tcpPacket.SequenceNumber.ToString());
+                                //
+                                this.tcp_info.Add("(确认序号)",tcpPacket.AcknowledgmentNumber.ToString());
+                                this.tcp_info.Add("DataOffset(数据偏移)", tcpPacket.DataOffset.ToString());
+                                this.tcp_info.Add("URG",tcpPacket.Urg.ToString());
+                                this.tcp_info.Add("ACK", tcpPacket.Ack.ToString());
+                                this.tcp_info.Add("PSH", tcpPacket.Psh.ToString());
+                                this.tcp_info.Add("RST", tcpPacket.Rst.ToString());
+                                this.tcp_info.Add("SYN", tcpPacket.Syn.ToString());
+                                this.tcp_info.Add("FIN", tcpPacket.Fin.ToString());
+                                this.tcp_info.Add("WindowSize(窗口)", tcpPacket.WindowSize.ToString());
+                                //待改为16进制
+                                this.tcp_info.Add("Checksum(校验和)",tcpPacket.Checksum.ToString());
+                                //
+                                this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
+                            }
+                        }
+                        //IpV6
+                        else if (ipPacket.Version.ToString() == "IPv6")
+                        {
+                            if (ipPacket.Protocol.ToString() == "ICMPV6")
+                            {
+                                var icmpPacket = PacketDotNet.ICMPv6Packet.GetEncapsulated(this.rPacket);
+                                //类型135存在bug
+                                /*
+                                if (icmpPacket.Type.ToString() != "135")
+                                {
+                                    this.icmp_info.Add("Type(类型)", icmpPacket.Type.ToString());
+                                }
+                                else
+                                {
+                                    this.icmp_info.Add("Type(类型)", "135");
+                                }
+                                */ 
+                                //
+                                this.icmp_info.Add("Code(代码)", icmpPacket.Code.ToString());
+                                //待改为16进制
+                                this.icmp_info.Add("Checksum(校验和)", icmpPacket.Checksum.ToString());
+                                //
+                                //标识符,待完成
+                                this.icmp_info.Add("Identifier(标识符)", "to be continued");
+                                //
+                            }
+                        }
+                    }
+                }
+                //ARP包解析
+                else if (ethernetPacket.Type.ToString() == "Arp")
+                {
+                    var arpPacket = PacketDotNet.ARPPacket.GetEncapsulated(this.rPacket);  //ARP包
+                    this.arp_info.Add("HardwareAddressType(硬件类型)", arpPacket.HardwareAddressType.ToString());
+                    this.arp_info.Add("ProtocolAddressType(协议类型)", arpPacket.ProtocolAddressType.ToString());
+                    this.arp_info.Add("HardwareAddressLength(硬件地址长度)", arpPacket.HardwareAddressLength.ToString());
+                    this.arp_info.Add("ProtocolAddressLength(协议地址长度)", arpPacket.ProtocolAddressLength.ToString());
+                    this.arp_info.Add("Operation(操作)", arpPacket.Operation.ToString());
+                    this.arp_info.Add("SenderHardwareAddress(发送者硬件地址)", arpPacket.SenderHardwareAddress.ToString());
+                    this.arp_info.Add("SenderProtocolAddress(发送者IP地址)", arpPacket.SenderProtocolAddress.ToString());
+                    this.arp_info.Add("TargetHardwareAddress(目标硬件地址)", arpPacket.TargetHardwareAddress.ToString());
+                    this.arp_info.Add("TargetProtocolAddress(目标IP地址)", arpPacket.TargetProtocolAddress.ToString());
+                }
             }
         }
 
