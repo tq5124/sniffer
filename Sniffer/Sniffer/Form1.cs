@@ -106,97 +106,17 @@ namespace Sniffer
         }
         private void PcapPorcessContext(PacketDotNet.RawPacket pPacket)
         {
-            var timestamp = pPacket.Timeval.Date;
-            var len = pPacket.Data.Length;
-            var layer = pPacket.LinkLayerType;
-
-            string time = timestamp.Hour.ToString() + ":" + timestamp.Minute.ToString() + ":" + timestamp.Second.ToString() + "," + timestamp.Millisecond.ToString();
-            string srcIp = "";
-            string destIp = "";
-            string protocol = "";
-            string info = "";
-            string color = "";
-
-            var packet = PacketDotNet.Packet.ParsePacket(pPacket); //Raw基础包对象
-            //Raw基础包详细数据的输出，为解析包作准备
-            /*
-            foreach (byte b in packet.Bytes)
-                Console.WriteLine("{0}", Convert.ToString(b, 16).ToUpper().PadLeft(2, '0'));
-            */
-            color = "White";
-
-            if (layer == PacketDotNet.LinkLayers.Ethernet) //以太网包
-            {
-                var ethernetPacket = (PacketDotNet.EthernetPacket)packet;
-                System.Net.NetworkInformation.PhysicalAddress srcMac = ethernetPacket.SourceHwAddress;
-                System.Net.NetworkInformation.PhysicalAddress destMac = ethernetPacket.DestinationHwAddress;
-
-                srcIp = srcMac.ToString();
-                destIp = destMac.ToString();
-
-                protocol = ethernetPacket.Type.ToString().ToUpper();
-                if (protocol == "ARP") 
-                {
-                    color = "Gray";
-                }
-                if (ethernetPacket.Type.ToString() != "IpV6")
-                {
-                    info = "Ethernet packet: " + ethernetPacket.ToColoredString(false);
-                }
-                else 
-                {
-                    info = "IpV6";
-                }
-                 
-                
-            }
-            var ipPacket = PacketDotNet.IpPacket.GetEncapsulated(packet);  //IP包     
-            if (ipPacket != null)
-            {
-                srcIp = ipPacket.SourceAddress.ToString();
-                destIp = ipPacket.DestinationAddress.ToString();
-                protocol = ipPacket.Protocol.ToString();
-
-                var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(packet); //TCP包
-                if (tcpPacket != null)
-                {
-                    int srcPort = tcpPacket.SourcePort;
-                    int destPort = tcpPacket.DestinationPort;
-
-                    protocol = "TCP";
-                    protocol = (destPort == 23) ? "TELNET" : protocol;
-                    protocol = (destPort == 80) ? "HTTP" : protocol;
-                    protocol = (destPort == 21) ? "FTP" : protocol;
-                    protocol = (destPort == 20) ? "FTP-DATA" : protocol;
-
-                    //info = "TCP packet: " + tcpPacket.ToColoredString(false);
-                    info = "TCP packet: " + tcpPacket.ToString();
-                }
-
-                var udpPacket = PacketDotNet.UdpPacket.GetEncapsulated(packet); //UDP包
-                if (udpPacket != null)
-                {
-                    int srcPort = udpPacket.SourcePort;
-                    int destPort = udpPacket.DestinationPort;
-
-                    protocol = "UDP";
-                    //info = "UDP packet: " + udpPacket.ToColoredString(false);
-                    info = "UDP packet: " + udpPacket.ToString();
-                }
-            }
-
-            packet temp = new packet(time,srcIp,destIp,protocol,info,color,pPacket);
+            packet temp = new packet(pPacket);
             packets.Add(temp);
 
             if (this.dataGridView1.InvokeRequired)
             {
-                //this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] {time, srcIp, destIp, protocol, info, color});
                 this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] {temp,packets.Count-1});
             }
             else
             {
                 int index = this.dataGridView1.Rows.Add();
-                this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(color);
+                this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
 
                 this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
                 this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
@@ -333,6 +253,7 @@ namespace Sniffer
         public string protocol;
         public string info;
         public string color;
+
         public PacketDotNet.LinkLayers layer;
         public PacketDotNet.Packet rPacket;
 
@@ -347,27 +268,18 @@ namespace Sniffer
         public Dictionary<string, string> tcp_info;
         public Dictionary<string, string> udp_info;
 
-        public packet()
+        public packet(PacketDotNet.RawPacket pPacket)
         {
-            this.time = "";
+            var timestamp = pPacket.Timeval.Date;
+            this.layer = pPacket.LinkLayerType;
+            this.time = timestamp.Hour.ToString() + ":" + timestamp.Minute.ToString() + ":" + timestamp.Second.ToString() + "," + timestamp.Millisecond.ToString();
             this.srcIp = "";
             this.destIp = "";
             this.protocol = "";
             this.info = "";
-            this.color = "";
+            this.color = "White";
 
-        }
-
-        public packet(string time, string srcIp, string destIp, string protocol, string info, string color, PacketDotNet.RawPacket pPacket)
-        {
-            this.time = time;
-            this.srcIp = srcIp;
-            this.destIp = destIp;
-            this.protocol = protocol;
-            this.info = info;
-            this.color = color;
             this.rPacket = PacketDotNet.Packet.ParsePacket(pPacket);
-            this.layer = pPacket.LinkLayerType;
 
             this.frame_info = new Dictionary<string, string>();
             this.ethernet_info = new Dictionary<string, string>();
@@ -395,6 +307,16 @@ namespace Sniffer
                 this.ethernet_info.Add("destMac(MAC目标地址)", ethernetPacket.DestinationHwAddress.ToString());
                 this.ethernet_info.Add("Type(以太类型)", ethernetPacket.Type.ToString());
 
+
+                //简易信息
+                this.srcIp = ethernetPacket.SourceHwAddress.ToString();
+                this.destIp = ethernetPacket.DestinationHwAddress.ToString();
+                this.protocol = ethernetPacket.Type.ToString();
+                //ICMPv6存在bug
+                if (ethernetPacket.Type.ToString() != "IpV6")
+                {
+                    this.info = ethernetPacket.ToString();
+                }
                 if (ethernetPacket.Type.ToString() == "IpV4" || ethernetPacket.Type.ToString() == "IpV6")
                 {
                     //IP包解析
@@ -417,6 +339,12 @@ namespace Sniffer
                         this.ip_info.Add("Source(源地址)", ipPacket.SourceAddress.ToString());
                         this.ip_info.Add("Destination(目的地址)", ipPacket.DestinationAddress.ToString());
 
+                        //简易信息
+                        this.srcIp = ipPacket.SourceAddress.ToString();
+                        this.destIp = ipPacket.DestinationAddress.ToString();
+                        this.protocol = ipPacket.Protocol.ToString();
+                        this.info = ipPacket.ToString();
+
                         //IpV4
                         if (ipPacket.Version.ToString() == "IPv4")
                         {
@@ -430,6 +358,9 @@ namespace Sniffer
                                 //
                                 this.icmp_info.Add("Identifier(标识符)", icmpPacket.ID.ToString());
                                 this.icmp_info.Add("Sequence(序列号)", icmpPacket.Sequence.ToString());
+
+                                //简易信息
+                                this.info = icmpPacket.ToString(); 
                             }
 
                             //IGMP包解析,待完成
@@ -437,6 +368,9 @@ namespace Sniffer
                             if (ipPacket.Protocol.ToString() == "IGMP")
                             {
                                 var tcpPacket = PacketDotNet.IGMPv2Packet.ParsePacket(this.rPacket);
+                              
+                                //简易信息
+                             
                             }
                             */
                             //
@@ -462,6 +396,10 @@ namespace Sniffer
                                 this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(2, '0'));
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
                                 this.tcp_info.Add("Option(可选部分)", "to be continued");
+
+                                //简易信息
+                                this.info = tcpPacket.ToString();
+
                             }
                             else if (ipPacket.Protocol.ToString() == "UDP")
                             { 
@@ -470,6 +408,9 @@ namespace Sniffer
                                 this.udp_info.Add("DestinationPort(目的端口)", udpPacket.DestinationPort.ToString());
                                 this.udp_info.Add("Length(报文长度)",udpPacket.Length.ToString());
                                 this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(2, '0'));
+
+                                //简易信息
+                                this.info = udpPacket.ToString();
                             }
                         }
                         //IpV6
@@ -497,6 +438,9 @@ namespace Sniffer
                                 //标识符,待完成
                                 this.icmp_info.Add("Identifier(标识符)", "to be continued");
                                 //
+
+                                //简易信息
+                                //this.info = icmpPacket.ToString();
                             }
                         }
                     }
@@ -514,6 +458,11 @@ namespace Sniffer
                     this.arp_info.Add("SenderProtocolAddress(发送者IP地址)", arpPacket.SenderProtocolAddress.ToString());
                     this.arp_info.Add("TargetHardwareAddress(目标硬件地址)", arpPacket.TargetHardwareAddress.ToString());
                     this.arp_info.Add("TargetProtocolAddress(目标IP地址)", arpPacket.TargetProtocolAddress.ToString());
+                
+                    //简易信息
+                    this.srcIp = arpPacket.SenderProtocolAddress.ToString();
+                    this.destIp = arpPacket.TargetProtocolAddress.ToString();
+                    this.info = arpPacket.ToString();
                 }
             }
         }
