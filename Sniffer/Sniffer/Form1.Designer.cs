@@ -45,7 +45,7 @@
             this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.treeView1 = new System.Windows.Forms.TreeView();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -194,21 +194,19 @@
             this.Column6.Name = "Column6";
             this.Column6.Visible = false;
             // 
-            // listBox1
+            // treeView1
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 12;
-            this.listBox1.Location = new System.Drawing.Point(42, 256);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(477, 88);
-            this.listBox1.TabIndex = 4;
+            this.treeView1.Location = new System.Drawing.Point(42, 256);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(477, 97);
+            this.treeView1.TabIndex = 4;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(608, 411);
-            this.Controls.Add(this.listBox1);
+            this.Controls.Add(this.treeView1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button8);
@@ -247,7 +245,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
-        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.TreeView treeView1;
     }
 }
 
