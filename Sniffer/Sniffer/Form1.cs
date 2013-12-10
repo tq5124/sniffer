@@ -111,7 +111,8 @@ namespace Sniffer
 
             if (this.dataGridView1.InvokeRequired)
             {
-                if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv6" && temp.tcp_info.Count > 0)
+                //if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv6" && temp.tcp_info.Count > 0)
+                //if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv4")
                 {
                     this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
                 }
@@ -361,6 +362,9 @@ namespace Sniffer
                                 this.icmp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.icmp_info.Add("Identifier(标识符)", icmpPacket.ID.ToString());
                                 this.icmp_info.Add("Sequence(序列号)", icmpPacket.Sequence.ToString());
+                                
+                                //颜色
+                                this.color = "Pink";
                                 //简易信息
                                 this.info = icmp_info["TypeCode(类型)"] + " id=" + icmp_info["Identifier(标识符)"] + ", seq=" + icmp_info["Sequence(序列号)"] + ", ttl=" + ip_info["Time to live(生存期)"]; 
                             }
@@ -399,6 +403,8 @@ namespace Sniffer
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
                                 this.tcp_info.Add("Option(可选部分)", "to be continued");
 
+                                //颜色
+                                this.color = "YellowGreen";
                                 //简易信息
                                 this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
@@ -411,6 +417,8 @@ namespace Sniffer
                                 this.udp_info.Add("Length(报文长度)",udpPacket.Length.ToString());
                                 this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
 
+                                //颜色
+                                this.color = "SkyBlue";
                                 //简易信息
                                 this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
                             }
@@ -453,6 +461,8 @@ namespace Sniffer
                                 this.icmp_info.Add("Code(代码)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.icmp_info.Add("Checksum(校验和)", icmpPacket.Checksum.ToString());
 
+                                //颜色
+                                this.color = "Pink";
                                 //简易信息
                                 //this.info = icmpPacket.ToString();
                             }
@@ -490,6 +500,8 @@ namespace Sniffer
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
                                 this.tcp_info.Add("Option(可选部分)", "to be continued");
 
+                                //颜色
+                                this.color = "YellowGreen";
                                 //简易信息
                                 this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
                             }
@@ -501,6 +513,8 @@ namespace Sniffer
                                 this.udp_info.Add("Length(报文长度)", udpPacket.Length.ToString());
                                 this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
 
+                                //颜色
+                                this.color = "SkyBlue";
                                 //简易信息
                                 this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
                             }
@@ -520,7 +534,9 @@ namespace Sniffer
                     this.arp_info.Add("SenderProtocolAddress(发送者IP地址)", arpPacket.SenderProtocolAddress.ToString());
                     this.arp_info.Add("TargetHardwareAddress(目标硬件地址)", arpPacket.TargetHardwareAddress.ToString());
                     this.arp_info.Add("TargetProtocolAddress(目标IP地址)", arpPacket.TargetProtocolAddress.ToString());
-                
+
+                    //颜色
+                    this.color = "Orange";
                     //简易信息
                     this.srcIp = arpPacket.SenderProtocolAddress.ToString();
                     this.destIp = arpPacket.TargetProtocolAddress.ToString();
