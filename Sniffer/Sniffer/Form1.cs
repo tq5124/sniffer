@@ -111,7 +111,10 @@ namespace Sniffer
 
             if (this.dataGridView1.InvokeRequired)
             {
-                this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] {temp,packets.Count-1});
+                if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv6" && temp.tcp_info.Count > 0)
+                {
+                    this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
+                }
             }
             else
             {
@@ -323,49 +326,48 @@ namespace Sniffer
                     var ipPacket = PacketDotNet.IpPacket.GetEncapsulated(this.rPacket);
                     if (ipPacket != null)
                     {
-                        this.ip_info.Add("Version(版本)", ipPacket.Version.ToString());
-                        this.ip_info.Add("Header Length(头长度)", (ipPacket.HeaderLength * 4).ToString());
-                        this.ip_info.Add("Differentiated Services Field(区分服务)", "0x" + Convert.ToString(ipPacket.Bytes[1], 16).ToUpper().PadLeft(2, '0'));
-                        this.ip_info.Add("Total Length(总长度)", ipPacket.TotalLength.ToString());
-                        this.ip_info.Add("Identification(标识)", "0x" + Convert.ToString(ipPacket.Bytes[4], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[5], 16).ToUpper().PadLeft(2, '0'));
-                        this.ip_info.Add("DF", ((ipPacket.Bytes[6] & 64) >> 6).ToString());
-                        this.ip_info.Add("MF", ((ipPacket.Bytes[6] & 32) >> 5).ToString());
-                        //分段偏移量,待测试检验
-                        this.ip_info.Add("Fragment offset(分段偏移量)", ((Convert.ToInt32(ipPacket.Bytes[6] & 31) << 8) + Convert.ToInt32(ipPacket.Bytes[7])).ToString());
-                        //
-                        this.ip_info.Add("Time to live(生存期)", ipPacket.TimeToLive.ToString());
-                        this.ip_info.Add("Protocol(协议)", ipPacket.Protocol.ToString());
-                        this.ip_info.Add("Header checksum(头部校验和)", "0x" + Convert.ToString(ipPacket.Bytes[10], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[11], 16).ToUpper().PadLeft(2, '0'));
-                        this.ip_info.Add("Source(源地址)", ipPacket.SourceAddress.ToString());
-                        this.ip_info.Add("Destination(目的地址)", ipPacket.DestinationAddress.ToString());
-
-                        //简易信息
-                        this.srcIp = ipPacket.SourceAddress.ToString();
-                        this.destIp = ipPacket.DestinationAddress.ToString();
-                        this.protocol = ipPacket.Protocol.ToString();
-                        this.info = ipPacket.ToString();
-
                         //IpV4
                         if (ipPacket.Version.ToString() == "IPv4")
                         {
+                            ipPacket = PacketDotNet.IPv4Packet.GetEncapsulated(this.rPacket);
+                            this.ip_info.Add("Version(版本)", ipPacket.Version.ToString());
+                            this.ip_info.Add("Header Length(头长度)", (ipPacket.HeaderLength * 4).ToString());
+                            this.ip_info.Add("Differentiated Services Field(区分服务)", "0x" + Convert.ToString(ipPacket.Bytes[1], 16).ToUpper().PadLeft(2, '0'));
+                            this.ip_info.Add("Total Length(总长度)", ipPacket.TotalLength.ToString());
+                            this.ip_info.Add("Identification(标识)", "0x" + Convert.ToString(ipPacket.Bytes[4], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[5], 16).ToUpper().PadLeft(2, '0'));
+                            this.ip_info.Add("DF", ((ipPacket.Bytes[6] & 64) >> 6).ToString());
+                            this.ip_info.Add("MF", ((ipPacket.Bytes[6] & 32) >> 5).ToString());
+                            //分段偏移量,待测试检验
+                            this.ip_info.Add("Fragment offset(分段偏移量)", ((Convert.ToInt32(ipPacket.Bytes[6] & 31) << 8) + Convert.ToInt32(ipPacket.Bytes[7])).ToString());
+                            //
+                            this.ip_info.Add("Time to live(生存期)", ipPacket.TimeToLive.ToString());
+                            this.ip_info.Add("Protocol(协议)", ipPacket.Protocol.ToString());
+                            this.ip_info.Add("Header checksum(头部校验和)", "0x" + Convert.ToString(ipPacket.Bytes[10], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[11], 16).ToUpper().PadLeft(2, '0'));
+                            this.ip_info.Add("Source(源地址)", ipPacket.SourceAddress.ToString());
+                            this.ip_info.Add("Destination(目的地址)", ipPacket.DestinationAddress.ToString());
+                            this.ip_info.Add("Options(可选)", "to be continued");
+
+                            //简易信息
+                            this.srcIp = ipPacket.SourceAddress.ToString();
+                            this.destIp = ipPacket.DestinationAddress.ToString();
+                            this.protocol = ipPacket.Protocol.ToString();
+                            this.info = ipPacket.ToString();
+
                             //ICMP包解析
                             if (ipPacket.Protocol.ToString() == "ICMP")
                             {
                                 var icmpPacket = PacketDotNet.ICMPv4Packet.GetEncapsulated(this.rPacket);
                                 this.icmp_info.Add("TypeCode(类型)",icmpPacket.TypeCode.ToString());
-                                //待改为16进制
-                                this.icmp_info.Add("Checksum(校验和)",icmpPacket.Checksum.ToString());
-                                //
+                                this.icmp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.icmp_info.Add("Identifier(标识符)", icmpPacket.ID.ToString());
                                 this.icmp_info.Add("Sequence(序列号)", icmpPacket.Sequence.ToString());
-
                                 //简易信息
-                                this.info = icmpPacket.ToString(); 
+                                this.info = icmp_info["TypeCode(类型)"] + " id=" + icmp_info["Identifier(标识符)"] + ", seq=" + icmp_info["Sequence(序列号)"] + ", ttl=" + ip_info["Time to live(生存期)"]; 
                             }
 
                             //IGMP包解析,待完成
                             /*
-                            if (ipPacket.Protocol.ToString() == "IGMP")
+                            else if (ipPacket.Protocol.ToString() == "IGMP")
                             {
                                 var tcpPacket = PacketDotNet.IGMPv2Packet.ParsePacket(this.rPacket);
                               
@@ -376,7 +378,7 @@ namespace Sniffer
                             //
 
                             //TCP包解析
-                            if (ipPacket.Protocol.ToString() == "TCP")
+                            else if (ipPacket.Protocol.ToString() == "TCP")
                             {
                                 var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(this.rPacket);
                                 this.tcp_info.Add("SourcePort(源端口)", tcpPacket.SourcePort.ToString());
@@ -384,7 +386,7 @@ namespace Sniffer
                                 //与wireshark不符，应该是wireshark特有的relative功能，待确认
                                 this.tcp_info.Add("SequenceNumber(序号)", tcpPacket.SequenceNumber.ToString());
                                 //
-                                this.tcp_info.Add("(确认序号)",tcpPacket.AcknowledgmentNumber.ToString());
+                                this.tcp_info.Add("AcknowledgmentNumber(确认序号)",tcpPacket.AcknowledgmentNumber.ToString());
                                 this.tcp_info.Add("DataOffset(数据偏移)", tcpPacket.DataOffset.ToString());
                                 this.tcp_info.Add("URG",tcpPacket.Urg.ToString());
                                 this.tcp_info.Add("ACK", tcpPacket.Ack.ToString());
@@ -392,13 +394,13 @@ namespace Sniffer
                                 this.tcp_info.Add("RST", tcpPacket.Rst.ToString());
                                 this.tcp_info.Add("SYN", tcpPacket.Syn.ToString());
                                 this.tcp_info.Add("FIN", tcpPacket.Fin.ToString());
-                                this.tcp_info.Add("WindowSize(窗口)", tcpPacket.WindowSize.ToString());
-                                this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(2, '0'));
+                                this.tcp_info.Add("WindowSize(窗口)", ((uint)tcpPacket.WindowSize).ToString());
+                                this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
                                 this.tcp_info.Add("Option(可选部分)", "to be continued");
 
                                 //简易信息
-                                this.info = tcpPacket.ToString();
+                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
                             }
                             else if (ipPacket.Protocol.ToString() == "UDP")
@@ -407,40 +409,100 @@ namespace Sniffer
                                 this.udp_info.Add("SourcePort(源端口)", udpPacket.SourcePort.ToString());
                                 this.udp_info.Add("DestinationPort(目的端口)", udpPacket.DestinationPort.ToString());
                                 this.udp_info.Add("Length(报文长度)",udpPacket.Length.ToString());
-                                this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(2, '0'));
+                                this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
 
                                 //简易信息
-                                this.info = udpPacket.ToString();
+                                this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
                             }
                         }
                         //IpV6
                         else if (ipPacket.Version.ToString() == "IPv6")
                         {
+                            ipPacket = PacketDotNet.IPv6Packet.GetEncapsulated(this.rPacket);
+                            this.ip_info.Add("Version(版本)", ipPacket.Version.ToString());
+                            this.ip_info.Add("Traffic Class(通信类别)", "0x" + Convert.ToString(ipPacket.Bytes[0] & 15, 16).ToUpper().PadLeft(1, '0') + Convert.ToString((ipPacket.Bytes[1] & 240) >> 4, 16).ToUpper().PadLeft(1, '0'));
+                            this.ip_info.Add("Flow Label(流标记)", "0x" + Convert.ToString(ipPacket.Bytes[1] & 15, 16).ToUpper().PadLeft(1, '0') + Convert.ToString(ipPacket.Bytes[2], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[3], 16).ToUpper().PadLeft(2, '0'));
+                            this.ip_info.Add("Payload Length(负载长度)",ipPacket.PayloadLength.ToString());
+                            this.ip_info.Add("Next Header(下一包头)",ipPacket.NextHeader.ToString());
+                            this.ip_info.Add("Hop Limit(跳段数限制)",ipPacket.HopLimit.ToString());
+                            this.ip_info.Add("Source Address(源地址)",ipPacket.SourceAddress.ToString());
+                            this.ip_info.Add("Destination Address(目的地址)",ipPacket.DestinationAddress.ToString());
+
+                            //简易信息
+                            this.srcIp = ipPacket.SourceAddress.ToString();
+                            this.destIp = ipPacket.DestinationAddress.ToString();
+                            this.protocol = ipPacket.Protocol.ToString();
+                            this.info = ipPacket.ToString();
+
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
                             {
                                 var icmpPacket = PacketDotNet.ICMPv6Packet.GetEncapsulated(this.rPacket);
-                                //类型135存在bug
-                                /*
-                                if (icmpPacket.Type.ToString() != "135")
+
+                                var type = Convert.ToString(icmpPacket.Bytes[0], 10);
+                                if (type != "135")
                                 {
-                                    this.icmp_info.Add("Type(类型)", icmpPacket.Type.ToString());
+                                    //type134问题
+                                    //this.icmp_info.Add("Type(类型)", icmpPacket.Type.ToString());
+                                    this.icmp_info.Add("Type(类型)", "to be continued");
                                 }
                                 else
                                 {
-                                    this.icmp_info.Add("Type(类型)", "135");
+                                    this.icmp_info.Add("Type(类型)", "Neighbor Solicitation");
                                 }
-                                */ 
                                 //
-                                this.icmp_info.Add("Code(代码)", icmpPacket.Code.ToString());
-                                //待改为16进制
+                                this.icmp_info.Add("Code(代码)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.icmp_info.Add("Checksum(校验和)", icmpPacket.Checksum.ToString());
-                                //
-                                //标识符,待完成
-                                this.icmp_info.Add("Identifier(标识符)", "to be continued");
-                                //
 
                                 //简易信息
                                 //this.info = icmpPacket.ToString();
+                            }
+
+                            //IGMP包解析,待完成
+                            /*
+                            else if (ipPacket.Protocol.ToString() == "IGMP")
+                            {
+                                var tcpPacket = PacketDotNet.IGMPv2Packet.ParsePacket(this.rPacket);
+                              
+                                //简易信息
+                             
+                            }
+                            */
+                            //
+
+                            else if (ipPacket.Protocol.ToString() == "TCP")
+                            {
+                                var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(this.rPacket);
+                                this.tcp_info.Add("SourcePort(源端口)", tcpPacket.SourcePort.ToString());
+                                this.tcp_info.Add("DestinationPort(目的端口)", tcpPacket.DestinationPort.ToString());
+                                //与wireshark不符，应该是wireshark特有的relative功能，待确认
+                                this.tcp_info.Add("SequenceNumber(序号)", tcpPacket.SequenceNumber.ToString());
+                                //
+                                this.tcp_info.Add("AcknowledgmentNumber(确认序号)", tcpPacket.AcknowledgmentNumber.ToString());
+                                this.tcp_info.Add("DataOffset(数据偏移)", tcpPacket.DataOffset.ToString());
+                                this.tcp_info.Add("URG", tcpPacket.Urg.ToString());
+                                this.tcp_info.Add("ACK", tcpPacket.Ack.ToString());
+                                this.tcp_info.Add("PSH", tcpPacket.Psh.ToString());
+                                this.tcp_info.Add("RST", tcpPacket.Rst.ToString());
+                                this.tcp_info.Add("SYN", tcpPacket.Syn.ToString());
+                                this.tcp_info.Add("FIN", tcpPacket.Fin.ToString());
+                                this.tcp_info.Add("WindowSize(窗口)", ((uint)tcpPacket.WindowSize).ToString());
+                                this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
+                                this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
+                                this.tcp_info.Add("Option(可选部分)", "to be continued");
+
+                                //简易信息
+                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
+                            }
+                            else if (ipPacket.Protocol.ToString() == "UDP")
+                            {
+                                var udpPacket = PacketDotNet.UdpPacket.GetEncapsulated(this.rPacket);
+                                this.udp_info.Add("SourcePort(源端口)", udpPacket.SourcePort.ToString());
+                                this.udp_info.Add("DestinationPort(目的端口)", udpPacket.DestinationPort.ToString());
+                                this.udp_info.Add("Length(报文长度)", udpPacket.Length.ToString());
+                                this.udp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(udpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
+
+                                //简易信息
+                                this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
                             }
                         }
                     }
@@ -462,7 +524,7 @@ namespace Sniffer
                     //简易信息
                     this.srcIp = arpPacket.SenderProtocolAddress.ToString();
                     this.destIp = arpPacket.TargetProtocolAddress.ToString();
-                    this.info = arpPacket.ToString();
+                    this.info = "Who has " + arp_info["TargetProtocolAddress(目标IP地址)"] + "?  Tell " + arp_info["SenderProtocolAddress(发送者IP地址)"];
                 }
             }
         }
