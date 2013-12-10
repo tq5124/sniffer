@@ -112,7 +112,7 @@ namespace Sniffer
             if (this.dataGridView1.InvokeRequired)
             {
                 //if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv6" && temp.tcp_info.Count > 0)
-                //if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv4")
+                if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv4" && temp.ip_info["Protocol(协议)"] == "IGMP")
                 {
                     this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
                 }
@@ -244,6 +244,19 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(udp_info);
             }
+            //应用层包
+            if (Packet.application_info.Count > 0)
+            {
+                TreeNode application_info = new TreeNode(Packet.application_info["ApplicationType"] + " : ");
+                foreach (KeyValuePair<string, string> item in Packet.application_info)
+                {
+                    if (item.Key != "ApplicationType")
+                    {
+                        application_info.Nodes.Add(item.Key + " : " + item.Value);
+                    }
+                }
+                this.treeView1.Nodes.Add(application_info);
+            }
         }
     }
 
@@ -272,6 +285,8 @@ namespace Sniffer
         public Dictionary<string, string> tcp_info;
         public Dictionary<string, string> udp_info;
 
+        public Dictionary<string, string> application_info;
+
         public packet(PacketDotNet.RawPacket pPacket)
         {
             var timestamp = pPacket.Timeval.Date;
@@ -295,6 +310,8 @@ namespace Sniffer
             this.igmp_info = new Dictionary<string, string>();
             this.tcp_info = new Dictionary<string, string>();
             this.udp_info = new Dictionary<string, string>();
+
+            this.application_info = new Dictionary<string, string>();
 
             analysis_packet();
         }
@@ -370,15 +387,25 @@ namespace Sniffer
                             }
 
                             //IGMP包解析,待完成
-                            /*
                             else if (ipPacket.Protocol.ToString() == "IGMP")
                             {
-                                var tcpPacket = PacketDotNet.IGMPv2Packet.ParsePacket(this.rPacket);
-                              
+                                //var igmpPacket = PacketDotNet.IGMPv2Packet.ParsePacket(this.rPacket);
+                                var igmpData = ipPacket.PayloadData;
+                                /*
+                                this.igmp_info.Add("Type(类型)",igmpPacket.Type.ToString());
+                                this.igmp_info.Add("MaxResponseTime(最大响应时间)", igmpPacket.MaxResponseTime.ToString());
+                                this.igmp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(igmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
+                                this.igmp_info.Add("GroupAddress(组地址)", igmpPacket.GroupAddress.ToString());
+                                
+                                */
+                                this.igmp_info.Add("Type(类型)", "0x" + Convert.ToString(igmpData[0], 16).ToUpper().PadLeft(2, '0'));
+                                this.igmp_info.Add("MaxResponseTime(最大响应时间)", "0x" + Convert.ToString(igmpData[1], 16).ToUpper().PadLeft(2, '0'));
+                                this.igmp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(igmpData[2], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(igmpData[3], 16).ToUpper().PadLeft(2, '0'));
+                                this.igmp_info.Add("GroupAddress(组地址)", Convert.ToString(igmpData[4], 10) + "." + Convert.ToString(igmpData[5], 10).ToUpper() + "." + Convert.ToString(igmpData[6], 10).ToUpper() + "." + Convert.ToString(igmpData[7], 10).ToUpper().PadLeft(2, '0'));
                                 //简易信息
-                             
+                                this.info = this.igmp_info["Type(类型)"] + " " + this.igmp_info["GroupAddress(组地址)"];
                             }
-                            */
+                            
                             //
 
                             //TCP包解析
@@ -408,6 +435,81 @@ namespace Sniffer
                                 //简易信息
                                 this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
+                                //判断具体应用层
+                                //TELNET待完善中文乱码
+                                if (tcp_info["SourcePort(源端口)"] == "23")
+                                {
+                                    this.protocol = "TELNET";
+                                    this.color = "Blue";
+                                    this.info = "Telnet Data ...";
+
+                                    this.application_info.Add("ApplicationType","TELNET");
+
+                                    var telnetData = tcpPacket.PayloadData;
+                                    //将接收到的数据转个码,顺便转成string型
+                                    string sRecieved = Encoding.GetEncoding("utf-8").GetString(telnetData, 0, telnetData.Length);
+                                    //声明一个字符串,用来存储解析过的字符串
+                                    string m_strLine = "";
+                                    //遍历接收到的字符
+                                    for (int i = 0; i < telnetData.Length; i++)
+                                    {
+                                        Char ch = Convert.ToChar(telnetData[i]);
+                                        switch (ch)
+                                        {
+                                            case '\r':
+                                                m_strLine += Convert.ToString("\r\n");
+                                                break;
+                                            case '\n':
+                                                break;
+                                            default:
+                                                m_strLine += Convert.ToString(ch);
+                                                break;
+
+                                        }
+                                    }
+                                    this.application_info.Add("Data",m_strLine);
+                                }
+                                //HTTP，待完善，存在很多空包及乱码问题
+                                else if (tcp_info["SourcePort(源端口)"] == "80")
+                                {
+                                    this.protocol = "HTTP";
+                                    this.color = "YellowGreen";
+                                    //this.info = "HTTP to be continued OK";
+
+                                    this.application_info.Add("ApplicationType", "HTTP");
+
+                                    var httpData = tcpPacket.PayloadData;
+                                    //将接收到的数据转个码,顺便转成string型
+                                    string sRecieved = Encoding.GetEncoding("utf-8").GetString(httpData, 0, httpData.Length);
+                                    //声明一个字符串,用来存储解析过的字符串
+                                    string m_strLine = "";
+                                    //遍历接收到的字符
+                                    for (int i = 0; i < httpData.Length; i++)
+                                    {
+                                        Char ch = Convert.ToChar(httpData[i]);
+                                        switch (ch)
+                                        {
+                                            case '\r':
+                                                m_strLine += Convert.ToString("\r\n");
+                                                break;
+                                            case '\n':
+                                                break;
+                                            default:
+                                                m_strLine += Convert.ToString(ch);
+                                                break;
+
+                                        }
+                                    }
+                                    this.application_info.Add("Data", m_strLine);
+                                    if (m_strLine.Length > 0 && m_strLine.IndexOf('\n') > 0 && m_strLine.IndexOf("HTTP") >= 0)
+                                    {
+                                        this.info = m_strLine.Substring(0, m_strLine.IndexOf('\n'));
+                                    }
+                                    else 
+                                    {
+                                        this.info = "Continuation or non-HTTP traffic";
+                                    }
+                                }
                             }
                             else if (ipPacket.Protocol.ToString() == "UDP")
                             { 
@@ -449,9 +551,9 @@ namespace Sniffer
                                 var type = Convert.ToString(icmpPacket.Bytes[0], 10);
                                 if (type != "135")
                                 {
-                                    //type134问题
+                                    //type134问题，待处理
                                     //this.icmp_info.Add("Type(类型)", icmpPacket.Type.ToString());
-                                    this.icmp_info.Add("Type(类型)", "to be continued");
+                                    this.icmp_info.Add("Type(类型)", type);
                                 }
                                 else
                                 {
@@ -463,8 +565,8 @@ namespace Sniffer
 
                                 //颜色
                                 this.color = "Pink";
-                                //简易信息
-                                //this.info = icmpPacket.ToString();
+                                //简易信息，待处理
+                                this.info = (type == "135") ? ("Neighbor Solicitation" + " for " + "to be continued" + " from " + "to be contiunued") : type;
                             }
 
                             //IGMP包解析,待完成
@@ -504,6 +606,82 @@ namespace Sniffer
                                 this.color = "YellowGreen";
                                 //简易信息
                                 this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
+
+                                //判断具体应用层
+                                //TELNET待完善中文乱码
+                                if (tcp_info["SourcePort(源端口)"] == "23")
+                                {
+                                    this.protocol = "TELNET";
+                                    this.color = "Blue";
+                                    this.info = "Telnet Data ...";
+
+                                    this.application_info.Add("ApplicationType", "TELNET");
+
+                                    var telnetData = tcpPacket.PayloadData;
+                                    //将接收到的数据转个码,顺便转成string型
+                                    string sRecieved = Encoding.GetEncoding("utf-8").GetString(telnetData, 0, telnetData.Length);
+                                    //声明一个字符串,用来存储解析过的字符串
+                                    string m_strLine = "";
+                                    //遍历接收到的字符
+                                    for (int i = 0; i < telnetData.Length; i++)
+                                    {
+                                        Char ch = Convert.ToChar(telnetData[i]);
+                                        switch (ch)
+                                        {
+                                            case '\r':
+                                                m_strLine += Convert.ToString("\r\n");
+                                                break;
+                                            case '\n':
+                                                break;
+                                            default:
+                                                m_strLine += Convert.ToString(ch);
+                                                break;
+
+                                        }
+                                    }
+                                    this.application_info.Add("Data", m_strLine);
+                                }
+                                //HTTP，待完善，存在很多空包及乱码问题
+                                else if (tcp_info["SourcePort(源端口)"] == "80")
+                                {
+                                    this.protocol = "HTTP";
+                                    this.color = "YellowGreen";
+                                    //this.info = "HTTP to be continued OK";
+
+                                    this.application_info.Add("ApplicationType", "HTTP");
+
+                                    var httpData = tcpPacket.PayloadData;
+                                    //将接收到的数据转个码,顺便转成string型
+                                    string sRecieved = Encoding.GetEncoding("utf-8").GetString(httpData, 0, httpData.Length);
+                                    //声明一个字符串,用来存储解析过的字符串
+                                    string m_strLine = "";
+                                    //遍历接收到的字符
+                                    for (int i = 0; i < httpData.Length; i++)
+                                    {
+                                        Char ch = Convert.ToChar(httpData[i]);
+                                        switch (ch)
+                                        {
+                                            case '\r':
+                                                m_strLine += Convert.ToString("\r\n");
+                                                break;
+                                            case '\n':
+                                                break;
+                                            default:
+                                                m_strLine += Convert.ToString(ch);
+                                                break;
+
+                                        }
+                                    }
+                                    this.application_info.Add("Data", m_strLine);
+                                    if (m_strLine.Length > 0 && m_strLine.IndexOf('\n') > 0 && m_strLine.IndexOf("HTTP") >= 0)
+                                    {
+                                        this.info = m_strLine.Substring(0, m_strLine.IndexOf('\n'));
+                                    }
+                                    else
+                                    {
+                                        this.info = "Continuation or non-HTTP traffic";
+                                    }
+                                }
                             }
                             else if (ipPacket.Protocol.ToString() == "UDP")
                             {
