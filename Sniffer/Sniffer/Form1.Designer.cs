@@ -260,7 +260,6 @@
             this.filter_rule.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.filter_rule.Size = new System.Drawing.Size(293, 277);
             this.filter_rule.TabIndex = 9;
-//            this.filter_rule.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.filter_rule_CellContentClick);
             // 
             // filter_rule_key
             // 
@@ -326,7 +325,9 @@
             "ip_addr",
             "ip_version",
             "port",
-            "protocol"});
+            "protocol",
+            "DF",
+            "MF"});
             this.filter_key.Location = new System.Drawing.Point(6, 10);
             this.filter_key.Name = "filter_key";
             this.filter_key.Size = new System.Drawing.Size(112, 20);

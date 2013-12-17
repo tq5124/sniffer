@@ -349,6 +349,18 @@ namespace Sniffer
                     if (Packet.ip_info.Count > 0)
                         pac_value.Add(Packet.ip_info["Version(版本)"]);
                     break;
+                case "DF":
+                    if (Packet.ip_info.Count > 0)
+                    {
+                        pac_value.Add(Packet.ip_info["DF"]);
+                    }
+                    break;
+                case "MF":
+                    if (Packet.ip_info.Count > 0)
+                    {
+                        pac_value.Add(Packet.ip_info["MF"]);
+                    }
+                    break;
                 default:
                     break;
             }
