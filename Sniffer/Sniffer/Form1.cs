@@ -379,7 +379,21 @@ namespace Sniffer
                         return true;
                     }
                     break;
+                case "包含":
+                    if (include_array_like(pac_value, value))
+                        return true;
+                    break;
                 default:
+                    return true;
+            }
+            return false;
+        }
+
+        private bool include_array_like(List<string> arr, string find)
+        {
+            foreach (string i in arr)
+            {
+                if (i.IndexOf(find) > 0)
                     return true;
             }
             return false;

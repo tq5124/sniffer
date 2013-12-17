@@ -283,7 +283,8 @@
             this.filter_oper.FormattingEnabled = true;
             this.filter_oper.Items.AddRange(new object[] {
             "==",
-            "!="});
+            "!=",
+            "包含"});
             this.filter_oper.Location = new System.Drawing.Point(125, 10);
             this.filter_oper.Name = "filter_oper";
             this.filter_oper.Size = new System.Drawing.Size(68, 20);
