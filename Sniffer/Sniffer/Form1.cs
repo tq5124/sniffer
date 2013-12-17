@@ -19,9 +19,10 @@ namespace Sniffer
             InitializeComponent();
             combox1_Ini();
         }
-
+        
         //抓包线程
         private delegate void setDataGridViewDelegate(packet Packet,int index);
+        private delegate bool filterCheckDelegate(packet Packet);
 
         private LivePcapDevice device;
         private int readTimeoutMilliseconds;
@@ -112,7 +113,11 @@ namespace Sniffer
             if (this.dataGridView1.InvokeRequired)
             {
                 //if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv6" && temp.tcp_info.Count > 0)
-                if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv4" && temp.ip_info["Protocol(协议)"] == "IGMP")
+                //if (temp.ip_info.Count > 0 && temp.ip_info["Version(版本)"] == "IPv4" && temp.ip_info["Protocol(协议)"] == "IGMP")
+                filterCheckDelegate filterDelegate = filter_check;
+                IAsyncResult asyncResult = filterDelegate.BeginInvoke(temp, null, null);
+                bool flag = filterDelegate.EndInvoke(asyncResult);
+                if (flag)
                 {
                     this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
                 }
@@ -128,6 +133,8 @@ namespace Sniffer
                 this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
                 this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
                 this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
+
+                this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
             }
         }
         /// <summary>
@@ -144,6 +151,8 @@ namespace Sniffer
             this.dataGridView1.Rows[index].Cells[3].Value = Packet.protocol;
             this.dataGridView1.Rows[index].Cells[4].Value = Packet.info;
             this.dataGridView1.Rows[index].Cells[5].Value = packet_index;
+
+            this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
         }
 
         /// <summary>
@@ -258,6 +267,122 @@ namespace Sniffer
                 this.treeView1.Nodes.Add(application_info);
             }
         }
+
+        // 过滤规则的tab页
+        private void filter_btn_clear_Click(object sender, EventArgs e)
+        {
+            this.filter_rule.Rows.Clear();
+        }
+
+        private void filter_btn_apply_Click(object sender, EventArgs e)
+        {
+            // 向列表中添加行
+            string key = this.filter_key.Text;
+            string oper = this.filter_oper.Text;
+            string value = this.filter_value.Text.ToUpper();
+            this.filter_key.Text = "";
+            this.filter_oper.Text = "";
+            this.filter_value.Text = "";
+            int index = this.filter_rule.Rows.Add();
+            this.filter_rule.Rows[index].Cells[0].Value = key;
+            this.filter_rule.Rows[index].Cells[1].Value = oper;
+            this.filter_rule.Rows[index].Cells[2].Value = value;
+
+            // 刷新包列表
+            this.dataGridView1.Rows.Clear();
+            int count = this.packets.Count;
+            for (index = 0; index < count; index++)
+            {
+                packet temp = (packet)this.packets[index];
+                filterCheckDelegate filterDelegate = filter_check;
+                IAsyncResult asyncResult = filterDelegate.BeginInvoke(temp, null, null);
+                bool flag = filterDelegate.EndInvoke(asyncResult);
+                if (flag)
+                {
+                    this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
+                }
+
+            }
+        }
+
+        private bool filter_check(packet Packet)
+        {
+            bool flag = true;
+            DataGridViewRowCollection rules = this.filter_rule.Rows;
+            foreach (DataGridViewRow item in rules){
+                string key = (string)(item.Cells[0].Value);
+                string oper = (string)(item.Cells[1].Value);
+                string value = (string)(item.Cells[2].Value);
+                flag = flag & _filter_check(Packet, key, oper, value);
+            }
+            return flag;
+        }
+
+        private bool _filter_check(packet Packet, string key, string oper, string value)
+        {   
+            // 取出packet中对应key的value，string形式
+            List<string> pac_value = new List<string>();
+            switch (key)
+            {
+                case "ip_addr":
+                    pac_value.Add(Packet.destIp);
+                    pac_value.Add(Packet.srcIp);
+                    break;
+                case "port":
+                    if (Packet.tcp_info.Count > 0)
+                    {
+                        pac_value.Add(Packet.tcp_info["SourcePort(源端口)"]);
+                        pac_value.Add(Packet.tcp_info["DestinationPort(目的端口)"]);
+                    }
+                    if (Packet.udp_info.Count > 0)
+                    {
+                        pac_value.Add(Packet.udp_info["SourcePort(源端口)"]);
+                        pac_value.Add(Packet.udp_info["DestinationPort(目的端口)"]);
+                    }
+                    break;
+                case "ip_version":
+                    if (Packet.ip_info.Count > 0)
+                        pac_value.Add(Packet.ip_info["Version(版本)"]);
+                    break;
+                default:
+                    break;
+            }
+
+            switch (oper)
+            {
+                case "==":
+                    if (include_array(pac_value, value))
+                    {
+                        return true;
+                    }
+                    break;
+                case "!=":
+                    if (!include_array(pac_value, value))
+                    {
+                        return true;
+                    }
+                    break;
+                default:
+                    return true;
+            }
+            return false;
+        }
+
+        private bool include_array(List<string> arr, string find)
+        {
+            foreach (string i in arr){
+                if (i == find)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            CheckForIllegalCrossThreadCalls = false;
+        }
     }
 
 
@@ -326,13 +451,13 @@ namespace Sniffer
                 var ethernetPacket = (PacketDotNet.EthernetPacket)this.rPacket;
                 this.ethernet_info.Add("srcMac(MAC源地址)", ethernetPacket.SourceHwAddress.ToString());
                 this.ethernet_info.Add("destMac(MAC目标地址)", ethernetPacket.DestinationHwAddress.ToString());
-                this.ethernet_info.Add("Type(以太类型)", ethernetPacket.Type.ToString());
+                this.ethernet_info.Add("Type(以太类型)", ethernetPacket.Type.ToString().ToUpper());
 
 
                 //简易信息
                 this.srcIp = ethernetPacket.SourceHwAddress.ToString();
                 this.destIp = ethernetPacket.DestinationHwAddress.ToString();
-                this.protocol = ethernetPacket.Type.ToString();
+                this.protocol = ethernetPacket.Type.ToString().ToUpper();
                 //ICMPv6存在bug
                 if (ethernetPacket.Type.ToString() != "IpV6")
                 {
@@ -348,7 +473,7 @@ namespace Sniffer
                         if (ipPacket.Version.ToString() == "IPv4")
                         {
                             ipPacket = PacketDotNet.IPv4Packet.GetEncapsulated(this.rPacket);
-                            this.ip_info.Add("Version(版本)", ipPacket.Version.ToString());
+                            this.ip_info.Add("Version(版本)", ipPacket.Version.ToString().ToUpper());
                             this.ip_info.Add("Header Length(头长度)", (ipPacket.HeaderLength * 4).ToString());
                             this.ip_info.Add("Differentiated Services Field(区分服务)", "0x" + Convert.ToString(ipPacket.Bytes[1], 16).ToUpper().PadLeft(2, '0'));
                             this.ip_info.Add("Total Length(总长度)", ipPacket.TotalLength.ToString());
@@ -359,7 +484,7 @@ namespace Sniffer
                             this.ip_info.Add("Fragment offset(分段偏移量)", ((Convert.ToInt32(ipPacket.Bytes[6] & 31) << 8) + Convert.ToInt32(ipPacket.Bytes[7])).ToString());
                             //
                             this.ip_info.Add("Time to live(生存期)", ipPacket.TimeToLive.ToString());
-                            this.ip_info.Add("Protocol(协议)", ipPacket.Protocol.ToString());
+                            this.ip_info.Add("Protocol(协议)", ipPacket.Protocol.ToString().ToUpper());
                             this.ip_info.Add("Header checksum(头部校验和)", "0x" + Convert.ToString(ipPacket.Bytes[10], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[11], 16).ToUpper().PadLeft(2, '0'));
                             this.ip_info.Add("Source(源地址)", ipPacket.SourceAddress.ToString());
                             this.ip_info.Add("Destination(目的地址)", ipPacket.DestinationAddress.ToString());
@@ -368,7 +493,7 @@ namespace Sniffer
                             //简易信息
                             this.srcIp = ipPacket.SourceAddress.ToString();
                             this.destIp = ipPacket.DestinationAddress.ToString();
-                            this.protocol = ipPacket.Protocol.ToString();
+                            this.protocol = ipPacket.Protocol.ToString().ToUpper();
                             this.info = ipPacket.ToString();
 
                             //ICMP包解析
@@ -425,7 +550,7 @@ namespace Sniffer
                                 this.tcp_info.Add("RST", tcpPacket.Rst.ToString());
                                 this.tcp_info.Add("SYN", tcpPacket.Syn.ToString());
                                 this.tcp_info.Add("FIN", tcpPacket.Fin.ToString());
-                                this.tcp_info.Add("WindowSize(窗口)", ((uint)tcpPacket.WindowSize).ToString());
+                                this.tcp_info.Add("WindowSize(窗口)", ((UInt16)tcpPacket.WindowSize).ToString());
                                 this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
                                 this.tcp_info.Add("Option(可选部分)", "to be continued");
@@ -529,7 +654,7 @@ namespace Sniffer
                         else if (ipPacket.Version.ToString() == "IPv6")
                         {
                             ipPacket = PacketDotNet.IPv6Packet.GetEncapsulated(this.rPacket);
-                            this.ip_info.Add("Version(版本)", ipPacket.Version.ToString());
+                            this.ip_info.Add("Version(版本)", ipPacket.Version.ToString().ToUpper());
                             this.ip_info.Add("Traffic Class(通信类别)", "0x" + Convert.ToString(ipPacket.Bytes[0] & 15, 16).ToUpper().PadLeft(1, '0') + Convert.ToString((ipPacket.Bytes[1] & 240) >> 4, 16).ToUpper().PadLeft(1, '0'));
                             this.ip_info.Add("Flow Label(流标记)", "0x" + Convert.ToString(ipPacket.Bytes[1] & 15, 16).ToUpper().PadLeft(1, '0') + Convert.ToString(ipPacket.Bytes[2], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(ipPacket.Bytes[3], 16).ToUpper().PadLeft(2, '0'));
                             this.ip_info.Add("Payload Length(负载长度)",ipPacket.PayloadLength.ToString());
@@ -541,7 +666,7 @@ namespace Sniffer
                             //简易信息
                             this.srcIp = ipPacket.SourceAddress.ToString();
                             this.destIp = ipPacket.DestinationAddress.ToString();
-                            this.protocol = ipPacket.Protocol.ToString();
+                            this.protocol = ipPacket.Protocol.ToString().ToUpper();
                             this.info = ipPacket.ToString();
 
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
@@ -597,7 +722,7 @@ namespace Sniffer
                                 this.tcp_info.Add("RST", tcpPacket.Rst.ToString());
                                 this.tcp_info.Add("SYN", tcpPacket.Syn.ToString());
                                 this.tcp_info.Add("FIN", tcpPacket.Fin.ToString());
-                                this.tcp_info.Add("WindowSize(窗口)", ((uint)tcpPacket.WindowSize).ToString());
+                                this.tcp_info.Add("WindowSize(窗口)", ((UInt16)tcpPacket.WindowSize).ToString());
                                 this.tcp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(tcpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.tcp_info.Add("UrgentPointer(紧急指针)", tcpPacket.UrgentPointer.ToString());
                                 this.tcp_info.Add("Option(可选部分)", "to be continued");

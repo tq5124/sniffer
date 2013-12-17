@@ -46,7 +46,22 @@
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.treeView1 = new System.Windows.Forms.TreeView();
+            this.tab_multi = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.filter_rule = new System.Windows.Forms.DataGridView();
+            this.filter_rule_key = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.filter_rule_oper = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.filter_rule_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.filter_oper = new System.Windows.Forms.ComboBox();
+            this.filter_btn_apply = new System.Windows.Forms.Button();
+            this.filter_btn_clear = new System.Windows.Forms.Button();
+            this.filter_value = new System.Windows.Forms.TextBox();
+            this.filter_key = new System.Windows.Forms.ComboBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.tab_multi.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).BeginInit();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -201,11 +216,138 @@
             this.treeView1.Size = new System.Drawing.Size(477, 97);
             this.treeView1.TabIndex = 4;
             // 
+            // tab_multi
+            // 
+            this.tab_multi.Controls.Add(this.tabPage1);
+            this.tab_multi.Controls.Add(this.tabPage2);
+            this.tab_multi.Location = new System.Drawing.Point(620, 9);
+            this.tab_multi.Name = "tab_multi";
+            this.tab_multi.SelectedIndex = 0;
+            this.tab_multi.Size = new System.Drawing.Size(324, 390);
+            this.tab_multi.TabIndex = 6;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.filter_rule);
+            this.tabPage1.Controls.Add(this.filter_oper);
+            this.tabPage1.Controls.Add(this.filter_btn_apply);
+            this.tabPage1.Controls.Add(this.filter_btn_clear);
+            this.tabPage1.Controls.Add(this.filter_value);
+            this.tabPage1.Controls.Add(this.filter_key);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(316, 364);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "过滤规则";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // filter_rule
+            // 
+            this.filter_rule.AllowUserToAddRows = false;
+            this.filter_rule.BackgroundColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.filter_rule.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.filter_rule.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.filter_rule.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.filter_rule_key,
+            this.filter_rule_oper,
+            this.filter_rule_value});
+            this.filter_rule.Location = new System.Drawing.Point(6, 65);
+            this.filter_rule.Name = "filter_rule";
+            this.filter_rule.RowHeadersVisible = false;
+            this.filter_rule.RowTemplate.Height = 23;
+            this.filter_rule.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.filter_rule.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.filter_rule.Size = new System.Drawing.Size(293, 277);
+            this.filter_rule.TabIndex = 9;
+//            this.filter_rule.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.filter_rule_CellContentClick);
+            // 
+            // filter_rule_key
+            // 
+            this.filter_rule_key.HeaderText = "键";
+            this.filter_rule_key.Name = "filter_rule_key";
+            // 
+            // filter_rule_oper
+            // 
+            this.filter_rule_oper.HeaderText = "操作符";
+            this.filter_rule_oper.Name = "filter_rule_oper";
+            this.filter_rule_oper.Width = 80;
+            // 
+            // filter_rule_value
+            // 
+            this.filter_rule_value.HeaderText = "值";
+            this.filter_rule_value.Name = "filter_rule_value";
+            // 
+            // filter_oper
+            // 
+            this.filter_oper.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.filter_oper.FormattingEnabled = true;
+            this.filter_oper.Items.AddRange(new object[] {
+            "==",
+            "!="});
+            this.filter_oper.Location = new System.Drawing.Point(125, 10);
+            this.filter_oper.Name = "filter_oper";
+            this.filter_oper.Size = new System.Drawing.Size(68, 20);
+            this.filter_oper.TabIndex = 8;
+            // 
+            // filter_btn_apply
+            // 
+            this.filter_btn_apply.Location = new System.Drawing.Point(6, 36);
+            this.filter_btn_apply.Name = "filter_btn_apply";
+            this.filter_btn_apply.Size = new System.Drawing.Size(75, 23);
+            this.filter_btn_apply.TabIndex = 6;
+            this.filter_btn_apply.Text = "apply";
+            this.filter_btn_apply.UseVisualStyleBackColor = true;
+            this.filter_btn_apply.Click += new System.EventHandler(this.filter_btn_apply_Click);
+            // 
+            // filter_btn_clear
+            // 
+            this.filter_btn_clear.Location = new System.Drawing.Point(87, 36);
+            this.filter_btn_clear.Name = "filter_btn_clear";
+            this.filter_btn_clear.Size = new System.Drawing.Size(75, 23);
+            this.filter_btn_clear.TabIndex = 5;
+            this.filter_btn_clear.Text = "clear";
+            this.filter_btn_clear.UseVisualStyleBackColor = true;
+            this.filter_btn_clear.Click += new System.EventHandler(this.filter_btn_clear_Click);
+            // 
+            // filter_value
+            // 
+            this.filter_value.Location = new System.Drawing.Point(199, 10);
+            this.filter_value.Name = "filter_value";
+            this.filter_value.Size = new System.Drawing.Size(100, 21);
+            this.filter_value.TabIndex = 4;
+            // 
+            // filter_key
+            // 
+            this.filter_key.DisplayMember = "ip";
+            this.filter_key.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.filter_key.FormattingEnabled = true;
+            this.filter_key.Items.AddRange(new object[] {
+            "ip_addr",
+            "ip_version",
+            "port",
+            "protocol"});
+            this.filter_key.Location = new System.Drawing.Point(6, 10);
+            this.filter_key.Name = "filter_key";
+            this.filter_key.Size = new System.Drawing.Size(112, 20);
+            this.filter_key.TabIndex = 2;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(316, 364);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(608, 411);
+            this.ClientSize = new System.Drawing.Size(956, 411);
+            this.Controls.Add(this.tab_multi);
             this.Controls.Add(this.treeView1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.label1);
@@ -220,7 +362,12 @@
             this.Controls.Add(this.comboBox1);
             this.Name = "Form1";
             this.Text = "Sniffer";
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.tab_multi.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -246,6 +393,18 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
         private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TabControl tab_multi;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.Button filter_btn_apply;
+        private System.Windows.Forms.Button filter_btn_clear;
+        private System.Windows.Forms.TextBox filter_value;
+        private System.Windows.Forms.ComboBox filter_key;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.ComboBox filter_oper;
+        private System.Windows.Forms.DataGridView filter_rule;
+        private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_key;
+        private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_oper;
+        private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_value;
     }
 }
 

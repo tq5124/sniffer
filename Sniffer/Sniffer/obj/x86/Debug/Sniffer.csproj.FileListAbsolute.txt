@@ -12,3 +12,15 @@ C:\Users\Cole\Desktop\C#\Sniffer\Sniffer\bin\Debug\SharpPcap.xml
 C:\Users\Cole\Desktop\C#\Sniffer\Sniffer\obj\x86\Debug\Sniffer.csprojResolveAssemblyReference.cache
 C:\Users\Cole\Desktop\Homework\计算机通信网\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.exe
 C:\Users\Cole\Desktop\Homework\计算机通信网\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.pdb
+Z:\webDev\sniffer\Sniffer\Sniffer\bin\Debug\Sniffer.exe
+Z:\webDev\sniffer\Sniffer\Sniffer\bin\Debug\Sniffer.pdb
+Z:\webDev\sniffer\Sniffer\Sniffer\bin\Debug\PacketDotNet.dll
+Z:\webDev\sniffer\Sniffer\Sniffer\bin\Debug\SharpPcap.dll
+Z:\webDev\sniffer\Sniffer\Sniffer\bin\Debug\PacketDotNet.xml
+Z:\webDev\sniffer\Sniffer\Sniffer\bin\Debug\SharpPcap.xml
+Z:\webDev\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.csprojResolveAssemblyReference.cache
+Z:\webDev\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.Form1.resources
+Z:\webDev\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.Properties.Resources.resources
+Z:\webDev\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.csproj.GenerateResource.Cache
+Z:\webDev\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.exe
+Z:\webDev\sniffer\Sniffer\Sniffer\obj\x86\Debug\Sniffer.pdb
