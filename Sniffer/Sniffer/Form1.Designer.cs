@@ -39,6 +39,12 @@
             this.button8 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.tab_multi = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -52,12 +58,6 @@
             this.filter_value = new System.Windows.Forms.TextBox();
             this.filter_key = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -177,6 +177,38 @@
             this.dataGridView1.TabIndex = 3;
             this.dataGridView1.Click += new System.EventHandler(this.dataGridView_row_click);
             // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "时间";
+            this.Column1.Name = "Column1";
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "源地址";
+            this.Column2.Name = "Column2";
+            // 
+            // Column3
+            // 
+            this.Column3.HeaderText = "目的地址";
+            this.Column3.Name = "Column3";
+            // 
+            // Column4
+            // 
+            this.Column4.HeaderText = "协议";
+            this.Column4.Name = "Column4";
+            this.Column4.Width = 74;
+            // 
+            // Column5
+            // 
+            this.Column5.HeaderText = "信息";
+            this.Column5.Name = "Column5";
+            // 
+            // Column6
+            // 
+            this.Column6.HeaderText = "index";
+            this.Column6.Name = "Column6";
+            this.Column6.Visible = false;
+            // 
             // treeView1
             // 
             this.treeView1.Location = new System.Drawing.Point(42, 256);
@@ -257,6 +289,7 @@
             this.filter_oper.Name = "filter_oper";
             this.filter_oper.Size = new System.Drawing.Size(68, 20);
             this.filter_oper.TabIndex = 8;
+            this.filter_oper.SelectedIndexChanged += new System.EventHandler(this.filter_oper_SelectedIndexChanged);
             // 
             // filter_btn_apply
             // 
@@ -284,6 +317,7 @@
             this.filter_value.Name = "filter_value";
             this.filter_value.Size = new System.Drawing.Size(100, 21);
             this.filter_value.TabIndex = 4;
+            this.filter_value.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.filter_value_KeyPress);
             // 
             // filter_key
             // 
@@ -296,11 +330,13 @@
             "port",
             "protocol",
             "DF",
-            "MF"});
+            "MF",
+            "application_data"});
             this.filter_key.Location = new System.Drawing.Point(6, 10);
             this.filter_key.Name = "filter_key";
             this.filter_key.Size = new System.Drawing.Size(112, 20);
             this.filter_key.TabIndex = 2;
+            this.filter_key.SelectedIndexChanged += new System.EventHandler(this.filter_key_SelectedIndexChanged);
             // 
             // tabPage2
             // 
@@ -311,38 +347,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "时间";
-            this.Column1.Name = "Column1";
-            // 
-            // Column2
-            // 
-            this.Column2.HeaderText = "源地址";
-            this.Column2.Name = "Column2";
-            // 
-            // Column3
-            // 
-            this.Column3.HeaderText = "目的地址";
-            this.Column3.Name = "Column3";
-            // 
-            // Column4
-            // 
-            this.Column4.HeaderText = "协议";
-            this.Column4.Name = "Column4";
-            this.Column4.Width = 74;
-            // 
-            // Column5
-            // 
-            this.Column5.HeaderText = "信息";
-            this.Column5.Name = "Column5";
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "index";
-            this.Column6.Name = "Column6";
-            this.Column6.Visible = false;
             // 
             // Form1
             // 

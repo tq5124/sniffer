@@ -18,6 +18,7 @@ namespace Sniffer
         {
             InitializeComponent();
             combox1_Ini();
+            this.filter_btn_apply.Enabled = false;
         }
         
         //抓包线程
@@ -335,6 +336,8 @@ namespace Sniffer
 
             // 刷新包列表
             this.dataGridView1.Rows.Clear();
+            if (this.packets == null)
+                return;
             int count = this.packets.Count;
             for (index = 0; index < count; index++)
             {
@@ -417,6 +420,10 @@ namespace Sniffer
                         pac_value.Add(Packet.ip_info["MF"]);
                     }
                     break;
+                case "application_data":
+                    if (Packet.application_info.Count > 0)
+                        pac_value.Add(Packet.application_info["Data"]);
+                    break;
                 default:
                     break;
             }
@@ -470,6 +477,31 @@ namespace Sniffer
         {
             CheckForIllegalCrossThreadCalls = false;
         }
+
+        private void filter_value_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == Convert.ToChar(13) && this.filter_btn_apply.Enabled == true)
+                filter_btn_apply_Click(null, null);
+        }
+
+        private void filter_key_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            check_filter_input();
+        }
+
+        private void check_filter_input()
+        {
+            if (this.filter_key.Text == "" || this.filter_oper.Text == "")
+                this.filter_btn_apply.Enabled = false;
+            else
+                this.filter_btn_apply.Enabled = true;
+        }
+
+        private void filter_oper_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            check_filter_input();
+        }
+
     }
 
 
