@@ -167,6 +167,14 @@ namespace Sniffer
             int index = int.Parse(this.dataGridView1.CurrentRow.Cells[5].Value.ToString());
             packet Packet = (packet)this.packets[index];
 
+            // 保存tree中的选中节点信息
+            string selected_path = "";
+            if (this.treeView1.SelectedNode != null)
+            {
+                selected_path = this.treeView1.SelectedNode.FullPath;
+                selected_path = selected_path.Substring(0, selected_path.LastIndexOf(" :"));
+            }
+            
             this.treeView1.Nodes.Clear();
 
             //物理层
@@ -265,6 +273,38 @@ namespace Sniffer
                 }
                 this.treeView1.Nodes.Add(application_info);
             }
+
+            // 选中之前的某个node节点
+            if (selected_path != "")
+            {
+                Console.Write(selected_path);
+                foreach (TreeNode node in this.treeView1.Nodes)
+                {
+                    TreeNode item = FindNode(node, selected_path);
+                    if (item != null)
+                    {
+                        this.treeView1.SelectedNode = item;
+                        this.treeView1.Focus();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 递归遍历treeview的所有节点
+        private TreeNode FindNode(TreeNode tnParent, string strValue)
+        {
+            if (tnParent == null) return null;
+            string item_path = tnParent.FullPath.Substring(0, tnParent.FullPath.LastIndexOf(" :"));
+            if (item_path == strValue) return tnParent;
+            Console.Write(item_path + '\n');
+            TreeNode tnRet = null;
+            foreach (TreeNode tn in tnParent.Nodes)
+            {
+                tnRet = FindNode(tn, strValue);
+                if (tnRet != null) break;
+            }
+            return tnRet;
         }
 
         // 过滤规则的tab页
