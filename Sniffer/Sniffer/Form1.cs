@@ -349,6 +349,22 @@ namespace Sniffer
                     if (Packet.ip_info.Count > 0)
                         pac_value.Add(Packet.ip_info["Version(版本)"]);
                     break;
+                case "protocol":
+                    if (Packet.ip_info.Count > 0)
+                        pac_value.Add("IP");
+                    if (Packet.tcp_info.Count > 0)
+                        pac_value.Add("TCP");
+                    if (Packet.udp_info.Count > 0)
+                        pac_value.Add("UDP");
+                    if (Packet.icmp_info.Count > 0)
+                        pac_value.Add("ICMP");
+                    if (Packet.igmp_info.Count > 0)
+                        pac_value.Add("IGMP");
+                    if (Packet.arp_info.Count > 0)
+                        pac_value.Add("ARP");
+                    if (Packet.application_info.Count > 0)
+                        pac_value.Add(Packet.application_info["ApplicationType"]);
+                    break;
                 case "DF":
                     if (Packet.ip_info.Count > 0)
                     {
