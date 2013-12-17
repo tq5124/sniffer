@@ -126,7 +126,6 @@ namespace Sniffer
             {
                 int index = this.dataGridView1.Rows.Add();
                 this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
-
                 this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
                 this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
                 this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
@@ -272,6 +271,12 @@ namespace Sniffer
         private void filter_btn_clear_Click(object sender, EventArgs e)
         {
             this.filter_rule.Rows.Clear();
+            int count = this.packets.Count;
+            for (int index = 0; index < count; index++)
+            {
+                packet temp = (packet)this.packets[index];
+                this.label1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
+            }
         }
 
         private void filter_btn_apply_Click(object sender, EventArgs e)
