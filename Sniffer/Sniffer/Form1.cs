@@ -737,7 +737,12 @@ namespace Sniffer
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
                                     string datatext = "";
+                                    string bytetext = "";
                                     string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    foreach (byte i in httpData)
+                                    {
+                                        bytetext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
+                                    }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
                                         if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
@@ -759,6 +764,7 @@ namespace Sniffer
                                     this.application_info.Add("Head", headertext);
                                     this.application_info.Add("Data", datatext);
                                     this.application_info.Add("All", ssHeader);
+                                    this.application_info.Add("Byte", bytetext);
 
                                     if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && (headertext.IndexOf("HTTP") >= 0 || headertext.IndexOf("GET") >= 0 || headertext.IndexOf("POST") >= 0))
                                     {
@@ -924,7 +930,12 @@ namespace Sniffer
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
                                     string datatext = "";
+                                    string bytetext = "";
                                     string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    foreach (byte i in httpData)
+                                    {
+                                        bytetext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
+                                    }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
                                         if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
@@ -946,6 +957,7 @@ namespace Sniffer
                                     this.application_info.Add("Head", headertext);
                                     this.application_info.Add("Data", datatext);
                                     this.application_info.Add("All", ssHeader);
+                                    this.application_info.Add("Byte", bytetext);
 
                                     if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && (headertext.IndexOf("HTTP") >= 0 || headertext.IndexOf("GET") >= 0 || headertext.IndexOf("POST") >= 0))
                                     {
