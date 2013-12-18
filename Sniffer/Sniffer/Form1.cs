@@ -726,7 +726,7 @@ namespace Sniffer
                                     this.application_info.Add("Data",m_strLine);
                                 }
                                 //HTTP，待完善，存在很多空包及乱码问题
-                                else if (tcp_info["SourcePort(源端口)"] == "80")
+                                else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
                                 {
                                     this.protocol = "HTTP";
                                     this.color = "YellowGreen";
@@ -896,7 +896,7 @@ namespace Sniffer
                                     this.application_info.Add("Data", m_strLine);
                                 }
                                 //HTTP，待完善，存在很多空包及乱码问题
-                                else if (tcp_info["SourcePort(源端口)"] == "80")
+                                else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
                                 {
                                     this.protocol = "HTTP";
                                     this.color = "YellowGreen";
