@@ -702,7 +702,7 @@ namespace Sniffer
                                 //颜色
                                 this.color = "YellowGreen";
                                 //简易信息
-                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
+                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["FIN"] == "True") ? " [FIN] " : "") + ((tcp_info["RST"] == "True") ? " [RST] " : "") + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
                                 //判断具体应用层
                                 //TELNET待完善中文乱码
@@ -739,30 +739,53 @@ namespace Sniffer
                                     this.application_info.Add("Data",m_strLine);
                                 }
                                 //HTTP，待完善，存在很多空包及乱码问题
-                                else if (tcp_info["SourcePort(源端口)"] == "80")
+                                else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
                                 {
-                                    this.protocol = "HTTP";
-                                    this.color = "YellowGreen";
-                                    //this.info = "HTTP to be continued OK";
-
-                                    this.application_info.Add("ApplicationType", "HTTP");
-
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
+                                    string datatext = "";
+                                    string bytetext = "";
                                     string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    foreach (byte i in httpData)
+                                    {
+                                        bytetext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
+                                    }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        {
+                                            headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                            int i = ssHeader.IndexOf("\r\n\r\n");
+                                            if (ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length < ssHeader.Length)
+                                            {
+                                                datatext = ssHeader.Substring(ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length, ssHeader.Length - ssHeader.IndexOf("\r\n\r\n") - "\r\n\r\n".Length);
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            datatext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        }
                                     }
 
-                                    this.application_info.Add("Data", headertext);
-                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && headertext.IndexOf("HTTP") >= 0)
+                                    
+                                    //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
+                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
                                     {
-                                        this.info = headertext.Substring(0, headertext.IndexOf('\n'));
+                                        this.protocol = "HTTP";
+                                        this.color = "YellowGreen";
+                                        this.info = headertext.Substring(0, (headertext.IndexOf('\n') >=0) ? headertext.IndexOf('\n') : headertext.Length);
+
+                                        this.application_info.Add("ApplicationType", "HTTP");
+                                        this.application_info.Add("Head", headertext);
+                                        this.application_info.Add("Data", datatext);
+                                        this.application_info.Add("All", ssHeader);
+                                        this.application_info.Add("Byte", bytetext);                                        
                                     }
-                                    else 
+                                    else if(ssHeader.Length > 0)
                                     {
-                                        this.info = "Continuation or non-HTTP traffic";
+                                        this.info = "TCP segment of a reassembled PDU";
+                                        this.tcp_info.Add("TCP segment data",ssHeader);
                                     }
                                 }
                             }
@@ -778,6 +801,18 @@ namespace Sniffer
                                 this.color = "SkyBlue";
                                 //简易信息
                                 this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
+                            
+                                //判断具体应用层
+                                //DNS待完成
+                                if (udp_info["SourcePort(源端口)"] == "53")
+                                {
+                                    this.protocol = "DNS";
+                                    this.color = "SkyBlue";
+                                    this.info = "DNS to be continued";
+
+                                    this.application_info.Add("ApplicationType", "DNS");
+                                    this.application_info.Add("Data", "");
+                                }
                             }
                         }
                         //IpV6
@@ -860,7 +895,7 @@ namespace Sniffer
                                 //颜色
                                 this.color = "YellowGreen";
                                 //简易信息
-                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
+                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["FIN"] == "True") ? " [FIN] " : "") + ((tcp_info["RST"] == "True") ? " [RST] " : "") + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
                                 //判断具体应用层
                                 //TELNET待完善中文乱码
@@ -897,30 +932,53 @@ namespace Sniffer
                                     this.application_info.Add("Data", m_strLine);
                                 }
                                 //HTTP，待完善，存在很多空包及乱码问题
-                                else if (tcp_info["SourcePort(源端口)"] == "80")
+                                else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
                                 {
-                                    this.protocol = "HTTP";
-                                    this.color = "YellowGreen";
-                                    //this.info = "HTTP to be continued OK";
-
-                                    this.application_info.Add("ApplicationType", "HTTP");
-
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
+                                    string datatext = "";
+                                    string bytetext = "";
                                     string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    foreach (byte i in httpData)
+                                    {
+                                        bytetext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
+                                    }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        {
+                                            headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                            int i = ssHeader.IndexOf("\r\n\r\n");
+                                            if (ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length < ssHeader.Length)
+                                            {
+                                                datatext = ssHeader.Substring(ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length, ssHeader.Length - ssHeader.IndexOf("\r\n\r\n") - "\r\n\r\n".Length);
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            datatext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        }
                                     }
 
-                                    this.application_info.Add("Data", headertext);
-                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && headertext.IndexOf("HTTP") >= 0)
+
+                                    //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
+                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
                                     {
-                                        this.info = headertext.Substring(0, headertext.IndexOf('\n'));
+                                        this.protocol = "HTTP";
+                                        this.color = "YellowGreen";
+                                        this.info = headertext.Substring(0, (headertext.IndexOf('\n') >= 0) ? headertext.IndexOf('\n') : headertext.Length);
+
+                                        this.application_info.Add("ApplicationType", "HTTP");
+                                        this.application_info.Add("Head", headertext);
+                                        this.application_info.Add("Data", datatext);
+                                        this.application_info.Add("All", ssHeader);
+                                        this.application_info.Add("Byte", bytetext);
                                     }
-                                    else
+                                    else if (ssHeader.Length > 0)
                                     {
-                                        this.info = "Continuation or non-HTTP traffic";
+                                        this.info = "TCP segment of a reassembled PDU";
+                                        this.tcp_info.Add("TCP segment data", ssHeader);
                                     }
                                 }
                             }
@@ -936,6 +994,18 @@ namespace Sniffer
                                 this.color = "SkyBlue";
                                 //简易信息
                                 this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
+
+                                //判断具体应用层
+                                //DNS待完成
+                                if (udp_info["SourcePort(源端口)"] == "53")
+                                {
+                                    this.protocol = "DNS";
+                                    this.color = "SkyBlue";
+                                    this.info = "DNS to be continued";
+
+                                    this.application_info.Add("ApplicationType", "DNS");
+                                    this.application_info.Add("Data", "");
+                                }
                             }
                         }
                     }
