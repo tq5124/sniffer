@@ -273,6 +273,9 @@ namespace Sniffer
                     }
                 }
                 this.treeView1.Nodes.Add(application_info);
+
+                // 将应用层数据交给display控件
+                display_data(Packet);
             }
 
             // 选中之前的某个node节点
@@ -290,6 +293,13 @@ namespace Sniffer
                     }
                 }
             }
+        }
+
+        // 在page页中显示application数据
+        private void display_data(packet Packet){
+            this.display_title.Text = Packet.application_info["ApplicationType"] + "包";
+            this.display_text.Text = Packet.application_info["Data"];
+            
         }
 
         // 递归遍历treeview的所有节点
@@ -396,7 +406,10 @@ namespace Sniffer
                     if (Packet.ip_info.Count > 0)
                         pac_value.Add("IP");
                     if (Packet.tcp_info.Count > 0)
+                    {
                         pac_value.Add("TCP");
+                        pac_value.Add("HTTP");
+                    }
                     if (Packet.udp_info.Count > 0)
                         pac_value.Add("UDP");
                     if (Packet.icmp_info.Count > 0)

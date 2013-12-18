@@ -58,10 +58,13 @@
             this.filter_value = new System.Windows.Forms.TextBox();
             this.filter_key = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.display_text = new System.Windows.Forms.TextBox();
+            this.display_title = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).BeginInit();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -340,13 +343,32 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.display_text);
+            this.tabPage2.Controls.Add(this.display_title);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(316, 364);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.Text = "应用层数据";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // display_text
+            // 
+            this.display_text.Location = new System.Drawing.Point(9, 36);
+            this.display_text.Multiline = true;
+            this.display_text.Name = "display_text";
+            this.display_text.Size = new System.Drawing.Size(281, 169);
+            this.display_text.TabIndex = 1;
+            // 
+            // display_title
+            // 
+            this.display_title.AutoSize = true;
+            this.display_title.Location = new System.Drawing.Point(7, 7);
+            this.display_title.Name = "display_title";
+            this.display_title.Size = new System.Drawing.Size(161, 12);
+            this.display_title.TabIndex = 0;
+            this.display_title.Text = "在左边选择需要展示数据的包";
             // 
             // Form1
             // 
@@ -375,6 +397,8 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).EndInit();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -412,6 +436,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
+        private System.Windows.Forms.TextBox display_text;
+        private System.Windows.Forms.Label display_title;
     }
 }
 
