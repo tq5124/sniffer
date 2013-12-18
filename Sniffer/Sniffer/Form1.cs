@@ -735,31 +735,17 @@ namespace Sniffer
                                     this.application_info.Add("ApplicationType", "HTTP");
 
                                     var httpData = tcpPacket.PayloadData;
-                                    //将接收到的数据转个码,顺便转成string型
-                                    string sRecieved = Encoding.GetEncoding("utf-8").GetString(httpData, 0, httpData.Length);
-                                    //声明一个字符串,用来存储解析过的字符串
-                                    string m_strLine = "";
-                                    //遍历接收到的字符
-                                    for (int i = 0; i < httpData.Length; i++)
+                                    string headertext = "";
+                                    string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        Char ch = Convert.ToChar(httpData[i]);
-                                        switch (ch)
-                                        {
-                                            case '\r':
-                                                m_strLine += Convert.ToString("\r\n");
-                                                break;
-                                            case '\n':
-                                                break;
-                                            default:
-                                                m_strLine += Convert.ToString(ch);
-                                                break;
-
-                                        }
+                                        headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
                                     }
-                                    this.application_info.Add("Data", m_strLine);
-                                    if (m_strLine.Length > 0 && m_strLine.IndexOf('\n') > 0 && m_strLine.IndexOf("HTTP") >= 0)
+
+                                    this.application_info.Add("Data", headertext);
+                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && headertext.IndexOf("HTTP") >= 0)
                                     {
-                                        this.info = m_strLine.Substring(0, m_strLine.IndexOf('\n'));
+                                        this.info = headertext.Substring(0, headertext.IndexOf('\n'));
                                     }
                                     else 
                                     {
@@ -907,31 +893,17 @@ namespace Sniffer
                                     this.application_info.Add("ApplicationType", "HTTP");
 
                                     var httpData = tcpPacket.PayloadData;
-                                    //将接收到的数据转个码,顺便转成string型
-                                    string sRecieved = Encoding.GetEncoding("utf-8").GetString(httpData, 0, httpData.Length);
-                                    //声明一个字符串,用来存储解析过的字符串
-                                    string m_strLine = "";
-                                    //遍历接收到的字符
-                                    for (int i = 0; i < httpData.Length; i++)
+                                    string headertext = "";
+                                    string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        Char ch = Convert.ToChar(httpData[i]);
-                                        switch (ch)
-                                        {
-                                            case '\r':
-                                                m_strLine += Convert.ToString("\r\n");
-                                                break;
-                                            case '\n':
-                                                break;
-                                            default:
-                                                m_strLine += Convert.ToString(ch);
-                                                break;
-
-                                        }
+                                        headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
                                     }
-                                    this.application_info.Add("Data", m_strLine);
-                                    if (m_strLine.Length > 0 && m_strLine.IndexOf('\n') > 0 && m_strLine.IndexOf("HTTP") >= 0)
+
+                                    this.application_info.Add("Data", headertext);
+                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && headertext.IndexOf("HTTP") >= 0)
                                     {
-                                        this.info = m_strLine.Substring(0, m_strLine.IndexOf('\n'));
+                                        this.info = headertext.Substring(0, headertext.IndexOf('\n'));
                                     }
                                     else
                                     {
