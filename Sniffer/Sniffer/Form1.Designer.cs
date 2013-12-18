@@ -368,6 +368,7 @@
             this.Controls.Add(this.comboBox1);
             this.Name = "Form1";
             this.Text = "Sniffer";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.check_closing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.tab_multi.ResumeLayout(false);

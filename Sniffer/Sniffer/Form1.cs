@@ -502,6 +502,18 @@ namespace Sniffer
             check_filter_input();
         }
 
+        private void check_closing(object sender, FormClosingEventArgs e)
+        {
+            if (MessageBox.Show("你确认要退出该程序吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                this.device.StopCapture();
+            }
+        }
+
     }
 
 
