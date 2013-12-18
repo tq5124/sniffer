@@ -728,12 +728,6 @@ namespace Sniffer
                                 //HTTP，待完善，存在很多空包及乱码问题
                                 else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
                                 {
-                                    this.protocol = "HTTP";
-                                    this.color = "YellowGreen";
-                                    //this.info = "HTTP to be continued OK";
-
-                                    this.application_info.Add("ApplicationType", "HTTP");
-
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
                                     string datatext = "";
@@ -761,18 +755,24 @@ namespace Sniffer
                                         }
                                     }
 
-                                    this.application_info.Add("Head", headertext);
-                                    this.application_info.Add("Data", datatext);
-                                    this.application_info.Add("All", ssHeader);
-                                    this.application_info.Add("Byte", bytetext);
+                                    
+                                    //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
+                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                    {
+                                        this.protocol = "HTTP";
+                                        this.color = "YellowGreen";
+                                        this.info = headertext.Substring(0, (headertext.IndexOf('\n') >=0) ? headertext.IndexOf('\n') : headertext.Length);
 
-                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && (headertext.IndexOf("HTTP") >= 0 || headertext.IndexOf("GET") >= 0 || headertext.IndexOf("POST") >= 0))
-                                    {
-                                        this.info = headertext.Substring(0, headertext.IndexOf('\n'));
+                                        this.application_info.Add("ApplicationType", "HTTP");
+                                        this.application_info.Add("Head", headertext);
+                                        this.application_info.Add("Data", datatext);
+                                        this.application_info.Add("All", ssHeader);
+                                        this.application_info.Add("Byte", bytetext);                                        
                                     }
-                                    else 
+                                    else if(ssHeader.Length > 0)
                                     {
-                                        this.info = "Continuation or non-HTTP traffic";
+                                        this.info = "TCP segment of a reassembled PDU";
+                                        this.tcp_info.Add("TCP segment data",ssHeader);
                                     }
                                 }
                             }
@@ -921,12 +921,6 @@ namespace Sniffer
                                 //HTTP，待完善，存在很多空包及乱码问题
                                 else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
                                 {
-                                    this.protocol = "HTTP";
-                                    this.color = "YellowGreen";
-                                    //this.info = "HTTP to be continued OK";
-
-                                    this.application_info.Add("ApplicationType", "HTTP");
-
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
                                     string datatext = "";
@@ -954,18 +948,24 @@ namespace Sniffer
                                         }
                                     }
 
-                                    this.application_info.Add("Head", headertext);
-                                    this.application_info.Add("Data", datatext);
-                                    this.application_info.Add("All", ssHeader);
-                                    this.application_info.Add("Byte", bytetext);
 
-                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && (headertext.IndexOf("HTTP") >= 0 || headertext.IndexOf("GET") >= 0 || headertext.IndexOf("POST") >= 0))
+                                    //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
+                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
                                     {
-                                        this.info = headertext.Substring(0, headertext.IndexOf('\n'));
+                                        this.protocol = "HTTP";
+                                        this.color = "YellowGreen";
+                                        this.info = headertext.Substring(0, (headertext.IndexOf('\n') >= 0) ? headertext.IndexOf('\n') : headertext.Length);
+
+                                        this.application_info.Add("ApplicationType", "HTTP");
+                                        this.application_info.Add("Head", headertext);
+                                        this.application_info.Add("Data", datatext);
+                                        this.application_info.Add("All", ssHeader);
+                                        this.application_info.Add("Byte", bytetext);
                                     }
-                                    else
+                                    else if (ssHeader.Length > 0)
                                     {
-                                        this.info = "Continuation or non-HTTP traffic";
+                                        this.info = "TCP segment of a reassembled PDU";
+                                        this.tcp_info.Add("TCP segment data", ssHeader);
                                     }
                                 }
                             }
