@@ -409,13 +409,13 @@ namespace Sniffer
                         pac_value.Add(Packet.application_info["ApplicationType"]);
                     break;
                 case "DF":
-                    if (Packet.ip_info.Count > 0)
+                    if (Packet.ip_info.Count > 0 && Packet.ip_info["Version(版本)"] == "IPV4")
                     {
                         pac_value.Add(Packet.ip_info["DF"]);
                     }
                     break;
                 case "MF":
-                    if (Packet.ip_info.Count > 0)
+                    if (Packet.ip_info.Count > 0 && Packet.ip_info["Version(版本)"] == "IPV4")
                     {
                         pac_value.Add(Packet.ip_info["MF"]);
                     }
