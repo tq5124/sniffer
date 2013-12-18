@@ -736,14 +736,31 @@ namespace Sniffer
 
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
+                                    string datatext = "";
                                     string ssHeader = System.Text.Encoding.Default.GetString(httpData);
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        {
+                                            headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                            int i = ssHeader.IndexOf("\r\n\r\n");
+                                            if (ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length < ssHeader.Length)
+                                            {
+                                                datatext = ssHeader.Substring(ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length, ssHeader.Length - ssHeader.IndexOf("\r\n\r\n") - "\r\n\r\n".Length);
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            datatext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        }
                                     }
 
-                                    this.application_info.Add("Data", headertext);
-                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && headertext.IndexOf("HTTP") >= 0)
+                                    this.application_info.Add("Head", headertext);
+                                    this.application_info.Add("Data", datatext);
+                                    this.application_info.Add("All", ssHeader);
+
+                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && (headertext.IndexOf("HTTP") >= 0 || headertext.IndexOf("GET") >= 0 || headertext.IndexOf("POST") >= 0))
                                     {
                                         this.info = headertext.Substring(0, headertext.IndexOf('\n'));
                                     }
@@ -906,14 +923,31 @@ namespace Sniffer
 
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
+                                    string datatext = "";
                                     string ssHeader = System.Text.Encoding.Default.GetString(httpData);
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        {
+                                            headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                            int i = ssHeader.IndexOf("\r\n\r\n");
+                                            if (ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length < ssHeader.Length)
+                                            {
+                                                datatext = ssHeader.Substring(ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length, ssHeader.Length - ssHeader.IndexOf("\r\n\r\n") - "\r\n\r\n".Length);
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            datatext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                        }
                                     }
 
-                                    this.application_info.Add("Data", headertext);
-                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && headertext.IndexOf("HTTP") >= 0)
+                                    this.application_info.Add("Head", headertext);
+                                    this.application_info.Add("Data", datatext);
+                                    this.application_info.Add("All", ssHeader);
+
+                                    if (headertext.Length > 0 && headertext.IndexOf('\n') > 0 && (headertext.IndexOf("HTTP") >= 0 || headertext.IndexOf("GET") >= 0 || headertext.IndexOf("POST") >= 0))
                                     {
                                         this.info = headertext.Substring(0, headertext.IndexOf('\n'));
                                     }
