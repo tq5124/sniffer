@@ -689,7 +689,7 @@ namespace Sniffer
                                 //颜色
                                 this.color = "YellowGreen";
                                 //简易信息
-                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
+                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["FIN"] == "True") ? " [FIN] " : "") + ((tcp_info["RST"] == "True") ? " [RST] " : "") + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
                                 //判断具体应用层
                                 //TELNET待完善中文乱码
@@ -765,6 +765,18 @@ namespace Sniffer
                                 this.color = "SkyBlue";
                                 //简易信息
                                 this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
+                            
+                                //判断具体应用层
+                                //DNS待完成
+                                if (udp_info["SourcePort(源端口)"] == "53")
+                                {
+                                    this.protocol = "DNS";
+                                    this.color = "SkyBlue";
+                                    this.info = "DNS to be continued";
+
+                                    this.application_info.Add("ApplicationType", "DNS");
+                                    this.application_info.Add("Data", "");
+                                }
                             }
                         }
                         //IpV6
@@ -847,7 +859,7 @@ namespace Sniffer
                                 //颜色
                                 this.color = "YellowGreen";
                                 //简易信息
-                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
+                                this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["FIN"] == "True") ? " [FIN] " : "") + ((tcp_info["RST"] == "True") ? " [RST] " : "") + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 
                                 //判断具体应用层
                                 //TELNET待完善中文乱码
@@ -923,6 +935,18 @@ namespace Sniffer
                                 this.color = "SkyBlue";
                                 //简易信息
                                 this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
+
+                                //判断具体应用层
+                                //DNS待完成
+                                if (udp_info["SourcePort(源端口)"] == "53")
+                                {
+                                    this.protocol = "DNS";
+                                    this.color = "SkyBlue";
+                                    this.info = "DNS to be continued";
+
+                                    this.application_info.Add("ApplicationType", "DNS");
+                                    this.application_info.Add("Data", "");
+                                }
                             }
                         }
                     }
