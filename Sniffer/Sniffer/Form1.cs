@@ -576,6 +576,65 @@ namespace Sniffer
             
         }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+            string capFile = "";
+            this.packets = new ArrayList();
+            this.dataGridView1.Rows.Clear();
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
+            ofd.Filter = "PCAP(*.pcap)|*.pcap";
+            ofd.ValidateNames = true;
+            ofd.CheckFileExists = true;
+            ofd.CheckPathExists = true;
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                capFile = ofd.FileName;
+                SharpPcap.LibPcap.CaptureFileReaderDevice captureFileReader = new SharpPcap.LibPcap.CaptureFileReaderDevice(capFile);
+
+                SharpPcap.RawCapture pPacket;
+                try
+                {
+                    // Go through all packets in the file
+                    while ((pPacket = captureFileReader.GetNextPacket()) != null)
+                    {
+                        packet temp = new packet(pPacket);
+                        this.packets.Add(temp);
+
+                        if (this.dataGridView1.InvokeRequired)
+                        {
+                            this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
+                        }
+                    else
+                        {
+                            int index = this.dataGridView1.Rows.Add();
+                            this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
+                            this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
+                            this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
+                            this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
+                            this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
+                            this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
+                            this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
+
+                            this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
+                        }
+                    }
+                    MessageBox.Show("读取完毕");
+                }
+                catch (Exception er)
+                {
+                    MessageBox.Show(er.Message);
+                    return;
+                }                
+            }
+            else
+            {
+                MessageBox.Show("ERROR");
+            }
+                        
+         }
+
+
         private void restruct_btn_get_Click(object sender, EventArgs e)
         {
             for (int index = 0; index < this.packets.Count; index++)
@@ -591,7 +650,7 @@ namespace Sniffer
         private void restruct_get_SelectedIndexChanged(object sender, EventArgs e)
         {
             foreach (DataGridViewRow i in this.filter_rule.Rows){
-                if (i.Cells[0].Value == "port")
+                if (i.Cells[0].Value.ToString() == "port")
                     this.filter_rule.Rows.Remove(i);
             }
             if (this.restruct_get.SelectedItem == null)
