@@ -39,12 +39,6 @@
             this.button8 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.tab_multi = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -60,11 +54,21 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.display_text = new System.Windows.Forms.TextBox();
             this.display_title = new System.Windows.Forms.Label();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.restruct_title = new System.Windows.Forms.Label();
+            this.restruct_text = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).BeginInit();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -171,6 +175,7 @@
             this.Column4,
             this.Column5,
             this.Column6});
+            this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridView1.Location = new System.Drawing.Point(42, 67);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersVisible = false;
@@ -179,38 +184,6 @@
             this.dataGridView1.Size = new System.Drawing.Size(477, 150);
             this.dataGridView1.TabIndex = 3;
             this.dataGridView1.Click += new System.EventHandler(this.dataGridView_row_click);
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "时间";
-            this.Column1.Name = "Column1";
-            // 
-            // Column2
-            // 
-            this.Column2.HeaderText = "源地址";
-            this.Column2.Name = "Column2";
-            // 
-            // Column3
-            // 
-            this.Column3.HeaderText = "目的地址";
-            this.Column3.Name = "Column3";
-            // 
-            // Column4
-            // 
-            this.Column4.HeaderText = "协议";
-            this.Column4.Name = "Column4";
-            this.Column4.Width = 74;
-            // 
-            // Column5
-            // 
-            this.Column5.HeaderText = "信息";
-            this.Column5.Name = "Column5";
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "index";
-            this.Column6.Name = "Column6";
-            this.Column6.Visible = false;
             // 
             // treeView1
             // 
@@ -223,6 +196,7 @@
             // 
             this.tab_multi.Controls.Add(this.tabPage1);
             this.tab_multi.Controls.Add(this.tabPage2);
+            this.tab_multi.Controls.Add(this.tabPage3);
             this.tab_multi.Location = new System.Drawing.Point(620, 9);
             this.tab_multi.Name = "tab_multi";
             this.tab_multi.SelectedIndex = 0;
@@ -370,6 +344,65 @@
             this.display_title.TabIndex = 0;
             this.display_title.Text = "在左边选择需要展示数据的包";
             // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "时间";
+            this.Column1.Name = "Column1";
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "源地址";
+            this.Column2.Name = "Column2";
+            // 
+            // Column3
+            // 
+            this.Column3.HeaderText = "目的地址";
+            this.Column3.Name = "Column3";
+            // 
+            // Column4
+            // 
+            this.Column4.HeaderText = "协议";
+            this.Column4.Name = "Column4";
+            this.Column4.Width = 74;
+            // 
+            // Column5
+            // 
+            this.Column5.HeaderText = "信息";
+            this.Column5.Name = "Column5";
+            // 
+            // Column6
+            // 
+            this.Column6.HeaderText = "index";
+            this.Column6.Name = "Column6";
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.restruct_text);
+            this.tabPage3.Controls.Add(this.restruct_title);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(316, 364);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "数据报重组";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // restruct_title
+            // 
+            this.restruct_title.AutoSize = true;
+            this.restruct_title.Location = new System.Drawing.Point(4, 7);
+            this.restruct_title.Name = "restruct_title";
+            this.restruct_title.Size = new System.Drawing.Size(161, 12);
+            this.restruct_title.TabIndex = 0;
+            this.restruct_title.Text = "序号：，找到：个，丢弃：个";
+            // 
+            // restruct_text
+            // 
+            this.restruct_text.Location = new System.Drawing.Point(6, 36);
+            this.restruct_text.Multiline = true;
+            this.restruct_text.Name = "restruct_text";
+            this.restruct_text.Size = new System.Drawing.Size(295, 166);
+            this.restruct_text.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -399,6 +432,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -430,14 +465,17 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_key;
         private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_oper;
         private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_value;
+        private System.Windows.Forms.TextBox display_text;
+        private System.Windows.Forms.Label display_title;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
-        private System.Windows.Forms.TextBox display_text;
-        private System.Windows.Forms.Label display_title;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Label restruct_title;
+        private System.Windows.Forms.TextBox restruct_text;
     }
 }
 
