@@ -693,5 +693,17 @@ namespace Sniffer
             }
         }
 
+        private void restruct_get_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow i in this.filter_rule.Rows)
+            {
+                if (i.Cells[0].Value.ToString() == "port")
+                    this.filter_rule.Rows.Remove(i);
+            }
+            if (this.restruct_get.SelectedItem == null)
+                return;
+            string port = this.restruct_get.SelectedItem.ToString().Substring(5, this.restruct_get.SelectedItem.ToString().IndexOf(" ") - 5);
+            filter_apply_newRule("port", "==", port);
+        }
     }
 }

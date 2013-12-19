@@ -408,6 +408,7 @@
             this.restruct_get.Name = "restruct_get";
             this.restruct_get.Size = new System.Drawing.Size(296, 184);
             this.restruct_get.TabIndex = 1;
+            this.restruct_get.SelectedIndexChanged += new System.EventHandler(this.restruct_get_SelectedIndexChanged);
             // 
             // restruct_title
             // 
