@@ -309,13 +309,13 @@ namespace Sniffer
                                 var icmpPacket = this.rPacket.Extract(typeof(PacketDotNet.ICMPv6Packet)) as PacketDotNet.ICMPv6Packet;
                                 
                                 var type = Convert.ToString(icmpPacket.Bytes[0], 10);
-                                if (type != "136")
+                                if (type == "135")
                                 {
                                     this.icmp_info.Add("Type(类型)", icmpPacket.Type.ToString());
                                 }
                                 else
                                 {
-                                    this.icmp_info.Add("Type(类型)", "136");
+                                    this.icmp_info.Add("Type(类型)", type);
                                 }
                                  
                                 //
@@ -326,7 +326,7 @@ namespace Sniffer
                                 //颜色
                                 this.color = "Pink";
                                 //简易信息，待处理              
-                                this.info = (type == "136") ? "136" : icmpPacket.Type.ToString();
+                                this.info = (type != "135") ? type : icmpPacket.Type.ToString();
                             }
 
                             //IGMP包解析,待完成
