@@ -557,6 +557,7 @@ namespace Sniffer
             sfd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
             sfd.Filter = "PCAP(*.pcap)|*.pcap";
             sfd.OverwritePrompt = true;
+            sfd.AddExtension = true;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 capFile = sfd.FileName;
