@@ -61,9 +61,9 @@
             this.display_text = new System.Windows.Forms.TextBox();
             this.display_title = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.restruct_title = new System.Windows.Forms.Label();
-            this.restruct_get = new System.Windows.Forms.ListBox();
             this.restruct_btn_get = new System.Windows.Forms.Button();
+            this.restruct_get = new System.Windows.Forms.ListBox();
+            this.restruct_title = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -153,8 +153,9 @@
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(75, 23);
             this.button8.TabIndex = 1;
-            this.button8.Text = "保存TXT";
+            this.button8.Text = "保存Pcap";
             this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // label1
             // 
@@ -388,14 +389,15 @@
             this.tabPage3.Text = "数据报重组";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // restruct_title
+            // restruct_btn_get
             // 
-            this.restruct_title.AutoSize = true;
-            this.restruct_title.Location = new System.Drawing.Point(4, 7);
-            this.restruct_title.Name = "restruct_title";
-            this.restruct_title.Size = new System.Drawing.Size(29, 12);
-            this.restruct_title.TabIndex = 0;
-            this.restruct_title.Text = "选中";
+            this.restruct_btn_get.Location = new System.Drawing.Point(203, 5);
+            this.restruct_btn_get.Name = "restruct_btn_get";
+            this.restruct_btn_get.Size = new System.Drawing.Size(100, 23);
+            this.restruct_btn_get.TabIndex = 2;
+            this.restruct_btn_get.Text = "button9";
+            this.restruct_btn_get.UseVisualStyleBackColor = true;
+            this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
             // 
             // restruct_get
             // 
@@ -406,15 +408,14 @@
             this.restruct_get.Size = new System.Drawing.Size(296, 184);
             this.restruct_get.TabIndex = 1;
             // 
-            // restruct_btn_get
+            // restruct_title
             // 
-            this.restruct_btn_get.Location = new System.Drawing.Point(203, 5);
-            this.restruct_btn_get.Name = "restruct_btn_get";
-            this.restruct_btn_get.Size = new System.Drawing.Size(100, 23);
-            this.restruct_btn_get.TabIndex = 2;
-            this.restruct_btn_get.Text = "button9";
-            this.restruct_btn_get.UseVisualStyleBackColor = true;
-            this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
+            this.restruct_title.AutoSize = true;
+            this.restruct_title.Location = new System.Drawing.Point(4, 7);
+            this.restruct_title.Name = "restruct_title";
+            this.restruct_title.Size = new System.Drawing.Size(29, 12);
+            this.restruct_title.TabIndex = 0;
+            this.restruct_title.Text = "选中";
             // 
             // Form1
             // 

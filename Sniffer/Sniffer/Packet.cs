@@ -14,8 +14,9 @@ namespace Sniffer
         public string info;
         public string color;
 
+        public SharpPcap.RawCapture pPacket;
         public PacketDotNet.LinkLayers layer;
-        public PacketDotNet.Packet rPacket;
+        public PacketDotNet.Packet rPacket;        
 
         public Dictionary<string, string> frame_info;
         public Dictionary<string, string> ethernet_info;
@@ -41,8 +42,9 @@ namespace Sniffer
             this.info = "";
             this.color = "White";
 
+            this.pPacket = pPacket;
             this.rPacket = PacketDotNet.Packet.ParsePacket(pPacket.LinkLayerType, pPacket.Data);
-
+            
             this.frame_info = new Dictionary<string, string>();
             this.ethernet_info = new Dictionary<string, string>();
 
@@ -301,32 +303,39 @@ namespace Sniffer
                             this.srcIp = ipPacket.SourceAddress.ToString();
                             this.destIp = ipPacket.DestinationAddress.ToString();
                             this.protocol = ipPacket.Protocol.ToString().ToUpper();
-                            //this.info = ipPacket.ToString();
-                            this.info = "IPV6 to be continued";
-
+                            try
+                            {
+                                this.info = ipPacket.ToString();
+                            }
+                            catch (Exception e)
+                            {
+                                this.info = "IPV6 to be continued";
+                                System.Windows.Forms.MessageBox.Show(e.Message);
+                            }
+                            
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
                             {
                                 var icmpPacket = this.rPacket.Extract(typeof(PacketDotNet.ICMPv6Packet)) as PacketDotNet.ICMPv6Packet;
                                 
                                 var type = Convert.ToString(icmpPacket.Bytes[0], 10);
-                                if (type == "135")
+                                try
                                 {
                                     this.icmp_info.Add("Type(类型)", icmpPacket.Type.ToString());
+                                    //简易信息，待处理              
+                                    this.info = icmpPacket.Type.ToString();
                                 }
-                                else
+                                catch (Exception e)
                                 {
                                     this.icmp_info.Add("Type(类型)", type);
+                                    this.info = type;
+                                    System.Windows.Forms.MessageBox.Show(e.Message);
                                 }
-                                 
-                                //
                                 
                                 this.icmp_info.Add("Code(代码)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.icmp_info.Add("Checksum(校验和)", icmpPacket.Checksum.ToString());
 
                                 //颜色
-                                this.color = "Pink";
-                                //简易信息，待处理              
-                                this.info = (type != "135") ? type : icmpPacket.Type.ToString();
+                                this.color = "Pink";                                
                             }
 
                             //IGMP包解析,待完成

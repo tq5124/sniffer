@@ -339,7 +339,7 @@ namespace Sniffer
             for (int index = 0; index < count; index++)
             {
                 packet temp = (packet)this.packets[index];
-                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, index - 1 });
+                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, index });
             }
         }
 
@@ -529,7 +529,9 @@ namespace Sniffer
         {
             check_filter_input();
         }
-
+        /// <summary>
+        /// 退出前的检查
+        /// </summary>
         private void check_closing(object sender, FormClosingEventArgs e)
         {
             if (MessageBox.Show("你确认要退出该程序吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
@@ -543,6 +545,35 @@ namespace Sniffer
                     this.device.StopCapture();
                 }
             }
+        }
+        /// <summary>
+        /// 保存为Pcap格式文件
+        /// </summary>
+        private void button8_Click(object sender, EventArgs e)
+        {
+            string capFile = "";
+            
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
+            sfd.Filter = "PCAP(*.pcap)|*.pcap";
+            sfd.OverwritePrompt = true;
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                capFile = sfd.FileName;
+                SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
+                int count = this.packets.Count;
+                foreach (packet i in this.packets)
+                {
+                    captureFileWriter.Write(i.pPacket);
+                }
+                MessageBox.Show("保存完毕");
+            }
+            else 
+            {
+                MessageBox.Show("ERROR");
+            }
+            
+            
         }
 
         private void restruct_btn_get_Click(object sender, EventArgs e)
