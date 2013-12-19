@@ -25,7 +25,7 @@ namespace Sniffer
         private delegate void setDataGridViewDelegate(packet Packet,int index);
         private delegate bool filterCheckDelegate(packet Packet);
 
-        private LivePcapDevice device;
+        private ICaptureDevice device;
         private int readTimeoutMilliseconds;
         private string filter;
         //抓到的所有包的所有信息
@@ -38,7 +38,7 @@ namespace Sniffer
             this.dataGridView1.Rows.Clear();
             //读取要监听的网卡
             int eth = System.Int32.Parse(this.comboBox1.SelectedValue.ToString());
-            var devices = LivePcapDeviceList.Instance;
+            var devices = CaptureDeviceList.Instance;
             this.device = devices[eth];
 
             this.readTimeoutMilliseconds = 1000;
@@ -65,7 +65,7 @@ namespace Sniffer
             //初始化下拉菜单的候选值
             ArrayList cboItems1 = new ArrayList();
 
-            var devices = LivePcapDeviceList.Instance;
+            var devices = CaptureDeviceList.Instance;
             if (devices.Count < 1)
             {
                 cboItems1.Add(new KeyValuePair<int, string>(-1, "找不到网络设备"));
@@ -73,9 +73,12 @@ namespace Sniffer
             else
             {
                 int i = 0;
-                foreach (LivePcapDevice dev in devices)
+                foreach (ICaptureDevice dev in devices)
                 {
-                    cboItems1.Add(new KeyValuePair<int, string>(i, dev.Interface.FriendlyName));
+                    string dev_friendlyname = dev.ToString();
+                    dev_friendlyname = dev_friendlyname.Substring(dev_friendlyname.IndexOf("FriendlyName: "),dev_friendlyname.Length - dev_friendlyname.IndexOf("FriendlyName: ") - "FriendlyName: ".Length);
+                    dev_friendlyname = dev_friendlyname.Substring("FriendlyName: ".Length, dev_friendlyname.IndexOf('\n') - "FriendlyName: ".Length);
+                    cboItems1.Add(new KeyValuePair<int, string>(i, dev_friendlyname));
                     i++;
                 }
             }
@@ -92,8 +95,8 @@ namespace Sniffer
         private void threadHandler()
         {
             this.device.Open(DeviceMode.Promiscuous, this.readTimeoutMilliseconds);
-            this.device.SetFilter(this.filter);
-            this.device.Mode = CaptureMode.Packets; //抓数据包
+            this.device.Filter = this.filter;
+            //this.device. = CaptureMode.Packets; //抓数据包
             this.device.OnPacketArrival += new PacketArrivalEventHandler(device_OnPacketArrival); //抓数据包回调事件
             //开始监听
             this.device.StartCapture();
@@ -106,7 +109,7 @@ namespace Sniffer
         {
             PcapPorcessContext(e.Packet);
         }
-        private void PcapPorcessContext(PacketDotNet.RawPacket pPacket)
+        private void PcapPorcessContext(SharpPcap.RawCapture pPacket)
         {
             packet temp = new packet(pPacket);
             packets.Add(temp);
@@ -160,7 +163,10 @@ namespace Sniffer
         /// </summary>
         private void button2_Click(object sender, EventArgs e)
         {
-            this.device.StopCapture();
+            if (this.device != null && this.device.Started)
+            {
+                this.device.StopCapture();
+            }
         }
 
         private void dataGridView_row_click(object sender, EventArgs e)
@@ -523,7 +529,10 @@ namespace Sniffer
             }
             else
             {
-                this.device.StopCapture();
+                if (this.device != null && this.device.Started)
+                {
+                    this.device.StopCapture();
+                }
             }
         }
 
