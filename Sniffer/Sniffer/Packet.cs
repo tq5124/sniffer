@@ -30,7 +30,7 @@ namespace Sniffer
 
         public Dictionary<string, string> application_info;
 
-        public packet(PacketDotNet.RawPacket pPacket)
+        public packet(SharpPcap.RawCapture pPacket)
         {
             var timestamp = pPacket.Timeval.Date;
             this.layer = pPacket.LinkLayerType;
@@ -41,7 +41,7 @@ namespace Sniffer
             this.info = "";
             this.color = "White";
 
-            this.rPacket = PacketDotNet.Packet.ParsePacket(pPacket);
+            this.rPacket = PacketDotNet.Packet.ParsePacket(pPacket.LinkLayerType, pPacket.Data);
 
             this.frame_info = new Dictionary<string, string>();
             this.ethernet_info = new Dictionary<string, string>();
@@ -307,7 +307,8 @@ namespace Sniffer
                             this.srcIp = ipPacket.SourceAddress.ToString();
                             this.destIp = ipPacket.DestinationAddress.ToString();
                             this.protocol = ipPacket.Protocol.ToString().ToUpper();
-                            this.info = ipPacket.ToString();
+                            //this.info = ipPacket.ToString();
+                            this.info = "IPV6 to be continued";
 
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
                             {
