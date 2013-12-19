@@ -19,6 +19,7 @@ namespace Sniffer
             InitializeComponent();
             combox1_Ini();
             this.filter_btn_apply.Enabled = false;
+            this.is_saved = true;
         }
         
         //抓包线程
@@ -30,9 +31,20 @@ namespace Sniffer
         private string filter;
         //抓到的所有包的所有信息
         private ArrayList packets;
+        //标定是否已保存的标志位
+        private bool is_saved;
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (this.is_saved == false)
+            {
+                if (MessageBox.Show("不保存并重新抓包？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                {
+                    return;
+                }
+            }
+            //设置保存标志位
+            this.is_saved = false;
             //清除之前的数据
             this.packets = new ArrayList();
             this.dataGridView1.Rows.Clear();
@@ -163,9 +175,13 @@ namespace Sniffer
         /// </summary>
         private void button2_Click(object sender, EventArgs e)
         {
-            if (this.device != null && this.device.Started)
+            try
             {
                 this.device.StopCapture();
+            }
+            catch (Exception)
+            {
+                ;
             }
         }
 
@@ -534,15 +550,33 @@ namespace Sniffer
         /// </summary>
         private void check_closing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("你确认要退出该程序吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+            if (this.is_saved == false)
             {
-                e.Cancel = true;
+                if (MessageBox.Show("不保存并退出？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    try
+                    {
+                        this.device.StopCapture();
+                    }
+                    catch (Exception)
+                    {
+                        ;
+                    }
+                }
             }
             else
             {
-                if (this.device != null && this.device.Started)
+                try
                 {
                     this.device.StopCapture();
+                }
+                catch (Exception)
+                {
+                    ;
                 }
             }
         }
@@ -560,76 +594,87 @@ namespace Sniffer
             sfd.AddExtension = true;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                capFile = sfd.FileName;
-                SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
-                int count = this.packets.Count;
-                foreach (packet i in this.packets)
-                {
-                    captureFileWriter.Write(i.pPacket);
-                }
-                MessageBox.Show("保存完毕");
-            }
-            else 
-            {
-                MessageBox.Show("ERROR");
-            }                       
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            string capFile = "";
-            this.packets = new ArrayList();
-            this.dataGridView1.Rows.Clear();
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
-            ofd.Filter = "PCAP(*.pcap)|*.pcap";
-            ofd.ValidateNames = true;
-            ofd.CheckFileExists = true;
-            ofd.CheckPathExists = true;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                capFile = ofd.FileName;
-                SharpPcap.LibPcap.CaptureFileReaderDevice captureFileReader = new SharpPcap.LibPcap.CaptureFileReaderDevice(capFile);
-
-                SharpPcap.RawCapture pPacket;
-
                 try
                 {
-                    // Go through all packets in the file
-                    while ((pPacket = captureFileReader.GetNextPacket()) != null)
+                    capFile = sfd.FileName;
+                    SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
+                    int count = this.packets.Count;
+                    foreach (packet i in this.packets)
                     {
-                        packet temp = new packet(pPacket);
-                        this.packets.Add(temp);
-
-                        if (this.dataGridView1.InvokeRequired)
-                        {
-                            this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
-                        }
-                        else
-                        {
-                            int index = this.dataGridView1.Rows.Add();
-                            this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
-                            this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
-                            this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
-                            this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
-                            this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
-                            this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
-                            this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
-
-                            this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
-                        }
+                        captureFileWriter.Write(i.pPacket);
                     }
-                    MessageBox.Show("读取完毕");
+                    this.is_saved = true;
+                    MessageBox.Show("保存完毕");
                 }
                 catch (Exception er)
                 {
                     MessageBox.Show(er.Message);
-                    return;
-                }                
-            }
-            else
+                }
+            }                  
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (this.is_saved == true || MessageBox.Show("不保存并读取文件？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
-                MessageBox.Show("ERROR");
+                try
+                {
+                    this.device.StopCapture();
+                }
+                catch (Exception)
+                {
+                    ;
+                }
+                string capFile = "";
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
+                ofd.Filter = "PCAP(*.pcap)|*.pcap";
+                ofd.ValidateNames = true;
+                ofd.CheckFileExists = true;
+                ofd.CheckPathExists = true;
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    this.packets = new ArrayList();
+                    this.dataGridView1.Rows.Clear();
+                    capFile = ofd.FileName;
+                    SharpPcap.LibPcap.CaptureFileReaderDevice captureFileReader = new SharpPcap.LibPcap.CaptureFileReaderDevice(capFile);
+
+                    SharpPcap.RawCapture pPacket;
+
+                    try
+                    {
+                        // Go through all packets in the file
+                        while ((pPacket = captureFileReader.GetNextPacket()) != null)
+                        {
+                            packet temp = new packet(pPacket);
+                            this.packets.Add(temp);
+
+                            if (this.dataGridView1.InvokeRequired)
+                            {
+                                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
+                            }
+                            else
+                            {
+                                int index = this.dataGridView1.Rows.Add();
+                                this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
+                                this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
+                                this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
+                                this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
+                                this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
+                                this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
+                                this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
+
+                                this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
+                            }
+                        }
+                        this.is_saved = true;
+                        MessageBox.Show("读取完毕");
+                    }
+                    catch (Exception er)
+                    {
+                        MessageBox.Show(er.Message);
+                    }
+                }
             }
         }
 
