@@ -181,6 +181,10 @@ namespace Sniffer
                 selected_path = this.treeView1.SelectedNode.FullPath;
                 selected_path = selected_path.Substring(0, selected_path.LastIndexOf(" :"));
             }
+
+            // 清空display页面的内容
+            this.display_title.Text = "";
+            this.display_text.Text = "";
             
             this.treeView1.Nodes.Clear();
 
@@ -304,7 +308,7 @@ namespace Sniffer
         // 在page页中显示application数据
         private void display_data(packet Packet){
             this.display_title.Text = Packet.application_info["ApplicationType"] + "包";
-            this.display_text.Text = Packet.application_info["Data"];
+            this.display_text.Text = Packet.application_info["All"];
             
         }
 
@@ -412,10 +416,7 @@ namespace Sniffer
                     if (Packet.ip_info.Count > 0)
                         pac_value.Add("IP");
                     if (Packet.tcp_info.Count > 0)
-                    {
                         pac_value.Add("TCP");
-                        pac_value.Add("HTTP");
-                    }
                     if (Packet.udp_info.Count > 0)
                         pac_value.Add("UDP");
                     if (Packet.icmp_info.Count > 0)
