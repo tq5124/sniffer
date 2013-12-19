@@ -171,6 +171,8 @@ namespace Sniffer
 
         private void dataGridView_row_click(object sender, EventArgs e)
         {
+            if (this.dataGridView1.SelectedRows == null)
+                return;
             int index = int.Parse(this.dataGridView1.CurrentRow.Cells[5].Value.ToString());
             packet Packet = (packet)this.packets[index];
 
@@ -332,11 +334,12 @@ namespace Sniffer
         private void filter_btn_clear_Click(object sender, EventArgs e)
         {
             this.filter_rule.Rows.Clear();
+            this.dataGridView1.Rows.Clear();
             int count = this.packets.Count;
             for (int index = 0; index < count; index++)
             {
                 packet temp = (packet)this.packets[index];
-                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
+                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, index - 1 });
             }
         }
 
@@ -349,6 +352,11 @@ namespace Sniffer
             this.filter_key.Text = "";
             this.filter_oper.Text = "";
             this.filter_value.Text = "";
+            filter_apply_newRule(key, oper, value);
+        }
+
+        private void filter_apply_newRule(string key, string oper, string value)
+        {
             int index = this.filter_rule.Rows.Add();
             this.filter_rule.Rows[index].Cells[0].Value = key;
             this.filter_rule.Rows[index].Cells[1].Value = oper;
@@ -533,6 +541,18 @@ namespace Sniffer
                 if (this.device != null && this.device.Started)
                 {
                     this.device.StopCapture();
+                }
+            }
+        }
+
+        private void restruct_btn_get_Click(object sender, EventArgs e)
+        {
+            for (int index = 0; index < this.packets.Count; index++)
+            {
+                packet Packet = (packet)this.packets[index];
+                if (Packet.info.IndexOf("GET") == 0)
+                {
+                    this.restruct_get.Items.Add(Packet.info);
                 }
             }
         }
