@@ -583,9 +583,21 @@ namespace Sniffer
                 packet Packet = (packet)this.packets[index];
                 if (Packet.info.IndexOf("GET") == 0)
                 {
-                    this.restruct_get.Items.Add(Packet.info);
+                    this.restruct_get.Items.Add("port:" + Packet.tcp_info["SourcePort(源端口)"] + " " + Packet.info);
                 }
             }
+        }
+
+        private void restruct_get_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow i in this.filter_rule.Rows){
+                if (i.Cells[0].Value == "port")
+                    this.filter_rule.Rows.Remove(i);
+            }
+            if (this.restruct_get.SelectedItem == null)
+                return;
+            string port = this.restruct_get.SelectedItem.ToString().Substring(5, this.restruct_get.SelectedItem.ToString().IndexOf(" ") - 5);
+            filter_apply_newRule("port", "==", port);
         }
 
     }
