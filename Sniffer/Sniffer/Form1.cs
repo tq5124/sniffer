@@ -543,13 +543,29 @@ namespace Sniffer
         /// </summary>
         private void button8_Click(object sender, EventArgs e)
         {
-            string capFile = "test.pcap";
-            SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
-            int count = this.packets.Count;
-            foreach(packet i in this.packets)
+            string capFile = "";
+            
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
+            sfd.Filter = "PCAP(*.pcap)|*.pcap";
+            sfd.OverwritePrompt = true;
+            if (sfd.ShowDialog() == DialogResult.OK)
             {
-                captureFileWriter.Write(i.pPacket);
+                capFile = sfd.FileName;
+                SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
+                int count = this.packets.Count;
+                foreach (packet i in this.packets)
+                {
+                    captureFileWriter.Write(i.pPacket);
+                }
+                MessageBox.Show("保存完毕");
             }
+            else 
+            {
+                MessageBox.Show("ERROR");
+            }
+            
+            
         }
 
     }
