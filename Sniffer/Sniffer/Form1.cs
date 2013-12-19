@@ -19,10 +19,11 @@ namespace Sniffer
             InitializeComponent();
             combox1_Ini();
             this.filter_btn_apply.Enabled = false;
+            this.is_saved = true;
         }
-        
+
         //抓包线程
-        private delegate void setDataGridViewDelegate(packet Packet,int index);
+        private delegate void setDataGridViewDelegate(packet Packet, int index);
         private delegate bool filterCheckDelegate(packet Packet);
 
         private ICaptureDevice device;
@@ -30,9 +31,20 @@ namespace Sniffer
         private string filter;
         //抓到的所有包的所有信息
         private ArrayList packets;
+        //标定是否已保存的标志位
+        private bool is_saved;
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (this.is_saved == false)
+            {
+                if (MessageBox.Show("不保存并重新抓包？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                {
+                    return;
+                }
+            }
+            //设置保存标志位
+            this.is_saved = false;
             //清除之前的数据
             this.packets = new ArrayList();
             this.dataGridView1.Rows.Clear();
@@ -76,7 +88,7 @@ namespace Sniffer
                 foreach (ICaptureDevice dev in devices)
                 {
                     string dev_friendlyname = dev.ToString();
-                    dev_friendlyname = dev_friendlyname.Substring(dev_friendlyname.IndexOf("FriendlyName: "),dev_friendlyname.Length - dev_friendlyname.IndexOf("FriendlyName: ") - "FriendlyName: ".Length);
+                    dev_friendlyname = dev_friendlyname.Substring(dev_friendlyname.IndexOf("FriendlyName: "), dev_friendlyname.Length - dev_friendlyname.IndexOf("FriendlyName: ") - "FriendlyName: ".Length);
                     dev_friendlyname = dev_friendlyname.Substring("FriendlyName: ".Length, dev_friendlyname.IndexOf('\n') - "FriendlyName: ".Length);
                     cboItems1.Add(new KeyValuePair<int, string>(i, dev_friendlyname));
                     i++;
@@ -143,7 +155,7 @@ namespace Sniffer
         /// <summary>
         /// 抓包后更新UI显示
         /// </summary>
-        private void setDataGridView(packet Packet,int packet_index)  //当跨线程调用时，调用该方法进行UI界面更新
+        private void setDataGridView(packet Packet, int packet_index)  //当跨线程调用时，调用该方法进行UI界面更新
         {
             int index = this.dataGridView1.Rows.Add();
             this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(Packet.color);
@@ -163,9 +175,13 @@ namespace Sniffer
         /// </summary>
         private void button2_Click(object sender, EventArgs e)
         {
-            if (this.device != null && this.device.Started)
+            try
             {
                 this.device.StopCapture();
+            }
+            catch (Exception)
+            {
+                ;
             }
         }
 
@@ -187,7 +203,7 @@ namespace Sniffer
             // 清空display页面的内容
             this.display_title.Text = "";
             this.display_text.Text = "";
-            
+
             this.treeView1.Nodes.Clear();
 
             //物理层
@@ -252,7 +268,7 @@ namespace Sniffer
                     igmp_info.Nodes.Add(item.Key + " : " + item.Value);
                 }
                 this.treeView1.Nodes.Add(igmp_info);
-            } 
+            }
             //TCP包
             if (Packet.tcp_info.Count > 0)
             {
@@ -308,10 +324,11 @@ namespace Sniffer
         }
 
         // 在page页中显示application数据
-        private void display_data(packet Packet){
+        private void display_data(packet Packet)
+        {
             this.display_title.Text = Packet.application_info["ApplicationType"] + "包";
             this.display_text.Text = Packet.application_info["All"];
-            
+
         }
 
         // 递归遍历treeview的所有节点
@@ -385,7 +402,8 @@ namespace Sniffer
         {
             bool flag = true;
             DataGridViewRowCollection rules = this.filter_rule.Rows;
-            foreach (DataGridViewRow item in rules){
+            foreach (DataGridViewRow item in rules)
+            {
                 string key = (string)(item.Cells[0].Value);
                 string oper = (string)(item.Cells[1].Value);
                 string value = (string)(item.Cells[2].Value);
@@ -395,7 +413,7 @@ namespace Sniffer
         }
 
         private bool _filter_check(packet Packet, string key, string oper, string value)
-        {   
+        {
             // 取出packet中对应key的value，string形式
             List<string> pac_value = new List<string>();
             switch (key)
@@ -492,7 +510,8 @@ namespace Sniffer
 
         private bool include_array(List<string> arr, string find)
         {
-            foreach (string i in arr){
+            foreach (string i in arr)
+            {
                 if (i == find)
                 {
                     return true;
@@ -534,15 +553,33 @@ namespace Sniffer
         /// </summary>
         private void check_closing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("你确认要退出该程序吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+            if (this.is_saved == false)
             {
-                e.Cancel = true;
+                if (MessageBox.Show("不保存并退出？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    try
+                    {
+                        this.device.StopCapture();
+                    }
+                    catch (Exception)
+                    {
+                        ;
+                    }
+                }
             }
             else
             {
-                if (this.device != null && this.device.Started)
+                try
                 {
                     this.device.StopCapture();
+                }
+                catch (Exception)
+                {
+                    ;
                 }
             }
         }
@@ -552,88 +589,97 @@ namespace Sniffer
         private void button8_Click(object sender, EventArgs e)
         {
             string capFile = "";
-            
+
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
             sfd.Filter = "PCAP(*.pcap)|*.pcap";
             sfd.OverwritePrompt = true;
+            sfd.AddExtension = true;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                capFile = sfd.FileName;
-                SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
-                int count = this.packets.Count;
-                foreach (packet i in this.packets)
-                {
-                    captureFileWriter.Write(i.pPacket);
-                }
-                MessageBox.Show("保存完毕");
-            }
-            else 
-            {
-                MessageBox.Show("ERROR");
-            }
-            
-            
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            string capFile = "";
-            this.packets = new ArrayList();
-            this.dataGridView1.Rows.Clear();
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
-            ofd.Filter = "PCAP(*.pcap)|*.pcap";
-            ofd.ValidateNames = true;
-            ofd.CheckFileExists = true;
-            ofd.CheckPathExists = true;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                capFile = ofd.FileName;
-                SharpPcap.LibPcap.CaptureFileReaderDevice captureFileReader = new SharpPcap.LibPcap.CaptureFileReaderDevice(capFile);
-
-                SharpPcap.RawCapture pPacket;
                 try
                 {
-                    // Go through all packets in the file
-                    while ((pPacket = captureFileReader.GetNextPacket()) != null)
+                    capFile = sfd.FileName;
+                    SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
+                    int count = this.packets.Count;
+                    foreach (packet i in this.packets)
                     {
-                        packet temp = new packet(pPacket);
-                        this.packets.Add(temp);
-
-                        if (this.dataGridView1.InvokeRequired)
-                        {
-                            this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
-                        }
-                    else
-                        {
-                            int index = this.dataGridView1.Rows.Add();
-                            this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
-                            this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
-                            this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
-                            this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
-                            this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
-                            this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
-                            this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
-
-                            this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
-                        }
+                        captureFileWriter.Write(i.pPacket);
                     }
-                    MessageBox.Show("读取完毕");
+                    this.is_saved = true;
+                    MessageBox.Show("保存完毕");
                 }
                 catch (Exception er)
                 {
                     MessageBox.Show(er.Message);
-                    return;
-                }                
+                }
             }
-            else
-            {
-                MessageBox.Show("ERROR");
-            }
-                        
-         }
+        }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (this.is_saved == true || MessageBox.Show("不保存并读取文件？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+            {
+                try
+                {
+                    this.device.StopCapture();
+                }
+                catch (Exception)
+                {
+                    ;
+                }
+                string capFile = "";
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
+                ofd.Filter = "PCAP(*.pcap)|*.pcap";
+                ofd.ValidateNames = true;
+                ofd.CheckFileExists = true;
+                ofd.CheckPathExists = true;
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    this.packets = new ArrayList();
+                    this.dataGridView1.Rows.Clear();
+                    capFile = ofd.FileName;
+                    SharpPcap.LibPcap.CaptureFileReaderDevice captureFileReader = new SharpPcap.LibPcap.CaptureFileReaderDevice(capFile);
+
+                    SharpPcap.RawCapture pPacket;
+
+                    try
+                    {
+                        // Go through all packets in the file
+                        while ((pPacket = captureFileReader.GetNextPacket()) != null)
+                        {
+                            packet temp = new packet(pPacket);
+                            this.packets.Add(temp);
+
+                            if (this.dataGridView1.InvokeRequired)
+                            {
+                                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
+                            }
+                            else
+                            {
+                                int index = this.dataGridView1.Rows.Add();
+                                this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
+                                this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
+                                this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
+                                this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
+                                this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
+                                this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
+                                this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
+
+                                this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
+                            }
+                        }
+                        this.is_saved = true;
+                        MessageBox.Show("读取完毕");
+                    }
+                    catch (Exception er)
+                    {
+                        MessageBox.Show(er.Message);
+                    }
+                }
+            }
+        }
 
         private void restruct_btn_get_Click(object sender, EventArgs e)
         {
@@ -642,21 +688,9 @@ namespace Sniffer
                 packet Packet = (packet)this.packets[index];
                 if (Packet.info.IndexOf("GET") == 0)
                 {
-                    this.restruct_get.Items.Add("port:" + Packet.tcp_info["SourcePort(源端口)"] + " " + Packet.info);
+                    this.restruct_get.Items.Add(Packet.info);
                 }
             }
-        }
-
-        private void restruct_get_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            foreach (DataGridViewRow i in this.filter_rule.Rows){
-                if (i.Cells[0].Value.ToString() == "port")
-                    this.filter_rule.Rows.Remove(i);
-            }
-            if (this.restruct_get.SelectedItem == null)
-                return;
-            string port = this.restruct_get.SelectedItem.ToString().Substring(5, this.restruct_get.SelectedItem.ToString().IndexOf(" ") - 5);
-            filter_apply_newRule("port", "==", port);
         }
 
     }
