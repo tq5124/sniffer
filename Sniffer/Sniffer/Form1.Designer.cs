@@ -121,16 +121,17 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(626, 131);
+            this.button5.Location = new System.Drawing.Point(626, 233);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 1;
-            this.button5.Text = "查看日志";
+            this.button5.Text = "读取Pacp";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(626, 160);
+            this.button6.Location = new System.Drawing.Point(626, 131);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(75, 23);
             this.button6.TabIndex = 1;
