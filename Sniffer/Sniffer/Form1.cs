@@ -336,7 +336,7 @@ namespace Sniffer
             for (int index = 0; index < count; index++)
             {
                 packet temp = (packet)this.packets[index];
-                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, packets.Count - 1 });
+                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, index });
             }
         }
 
