@@ -521,7 +521,9 @@ namespace Sniffer
         {
             check_filter_input();
         }
-
+        /// <summary>
+        /// 退出前的检查
+        /// </summary>
         private void check_closing(object sender, FormClosingEventArgs e)
         {
             if (MessageBox.Show("你确认要退出该程序吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
@@ -534,6 +536,19 @@ namespace Sniffer
                 {
                     this.device.StopCapture();
                 }
+            }
+        }
+        /// <summary>
+        /// 保存为Pcap格式文件
+        /// </summary>
+        private void button8_Click(object sender, EventArgs e)
+        {
+            string capFile = "test.pcap";
+            SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
+            int count = this.packets.Count;
+            foreach(packet i in this.packets)
+            {
+                captureFileWriter.Write(i.pPacket);
             }
         }
 

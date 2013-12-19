@@ -14,8 +14,9 @@ namespace Sniffer
         public string info;
         public string color;
 
+        public SharpPcap.RawCapture pPacket;
         public PacketDotNet.LinkLayers layer;
-        public PacketDotNet.Packet rPacket;
+        public PacketDotNet.Packet rPacket;        
 
         public Dictionary<string, string> frame_info;
         public Dictionary<string, string> ethernet_info;
@@ -41,8 +42,9 @@ namespace Sniffer
             this.info = "";
             this.color = "White";
 
+            this.pPacket = pPacket;
             this.rPacket = PacketDotNet.Packet.ParsePacket(pPacket.LinkLayerType, pPacket.Data);
-
+            
             this.frame_info = new Dictionary<string, string>();
             this.ethernet_info = new Dictionary<string, string>();
 
