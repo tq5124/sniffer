@@ -200,10 +200,6 @@ namespace Sniffer
                 selected_path = selected_path.Substring(0, selected_path.LastIndexOf(" :"));
             }
 
-            // 清空display页面的内容
-            this.display_title.Text = "";
-            this.display_text.Text = "";
-
             this.treeView1.Nodes.Clear();
 
             //物理层
@@ -301,9 +297,6 @@ namespace Sniffer
                     }
                 }
                 this.treeView1.Nodes.Add(application_info);
-
-                // 将应用层数据交给display控件
-                display_data(Packet);
             }
 
             // 选中之前的某个node节点
@@ -321,14 +314,6 @@ namespace Sniffer
                     }
                 }
             }
-        }
-
-        // 在page页中显示application数据
-        private void display_data(packet Packet)
-        {
-            this.display_title.Text = Packet.application_info["ApplicationType"] + "包";
-            this.display_text.Text = Packet.application_info["All"];
-
         }
 
         // 递归遍历treeview的所有节点
@@ -718,6 +703,38 @@ namespace Sniffer
             filter_apply_newRule("port", "==", port);
 
             // 选中get请求中的tcp segment
+            int startGet = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
+            int endGet = (e.RowIndex == this.restruct_get.Rows.Count - 1) ? int.Parse((this.dataGridView1.RowCount-1).ToString()) : int.Parse(this.restruct_get.Rows[e.RowIndex+1].Cells[0].Value.ToString());
+            this.display_text.Text = "";
+            Dictionary<long, string> text = new Dictionary<long,string>();
+            List<long> text_seq = new List<long>();
+            this.display_title.Text = this.restruct_get.Rows[e.RowIndex].Cells[2].Value.ToString();
+            for (int index = startGet; index < endGet; index++)
+            {
+                packet temp = (packet)this.packets[index];
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["DestinationPort(目的端口)"] == port && temp.info == "TCP segment of a reassembled PDU")
+                {
+                    long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
+                    if (!text.ContainsKey(seq)){
+                        text.Add(seq, temp.tcp_info["TCP segment data"]);
+                        text_seq.Add(seq);
+                    }
+                }
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["DestinationPort(目的端口)"] == port && temp.protocol == "HTTP")
+                {
+                    long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
+                    if (!text.ContainsKey(seq))
+                    {
+                        text.Add(seq, temp.application_info["Data"]);
+                        text_seq.Add(seq);
+                    }
+                }
+            }
+            text_seq.Sort();
+            foreach (long i in text_seq)
+            {
+                this.display_text.Text += text[i];
+            }
         }
     }
 }

@@ -61,12 +61,12 @@
             this.display_text = new System.Windows.Forms.TextBox();
             this.display_title = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.restruct_btn_get = new System.Windows.Forms.Button();
-            this.restruct_title = new System.Windows.Forms.Label();
             this.restruct_get = new System.Windows.Forms.DataGridView();
             this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dport = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.message = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.restruct_btn_get = new System.Windows.Forms.Button();
+            this.restruct_title = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -252,7 +252,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(316, 416);
+            this.tabPage1.Size = new System.Drawing.Size(372, 416);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "过滤规则";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -361,7 +361,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(316, 416);
+            this.tabPage2.Size = new System.Drawing.Size(372, 416);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "应用层数据";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -371,6 +371,7 @@
             this.display_text.Location = new System.Drawing.Point(9, 36);
             this.display_text.Multiline = true;
             this.display_text.Name = "display_text";
+            this.display_text.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.display_text.Size = new System.Drawing.Size(281, 169);
             this.display_text.TabIndex = 1;
             // 
@@ -394,25 +395,6 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "数据报重组";
             this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // restruct_btn_get
-            // 
-            this.restruct_btn_get.Location = new System.Drawing.Point(256, 3);
-            this.restruct_btn_get.Name = "restruct_btn_get";
-            this.restruct_btn_get.Size = new System.Drawing.Size(100, 23);
-            this.restruct_btn_get.TabIndex = 2;
-            this.restruct_btn_get.Text = "过滤get包";
-            this.restruct_btn_get.UseVisualStyleBackColor = true;
-            this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
-            // 
-            // restruct_title
-            // 
-            this.restruct_title.AutoSize = true;
-            this.restruct_title.Location = new System.Drawing.Point(4, 7);
-            this.restruct_title.Name = "restruct_title";
-            this.restruct_title.Size = new System.Drawing.Size(29, 12);
-            this.restruct_title.TabIndex = 0;
-            this.restruct_title.Text = "选中";
             // 
             // restruct_get
             // 
@@ -449,6 +431,25 @@
             this.message.HeaderText = "message";
             this.message.Name = "message";
             this.message.Width = 190;
+            // 
+            // restruct_btn_get
+            // 
+            this.restruct_btn_get.Location = new System.Drawing.Point(256, 3);
+            this.restruct_btn_get.Name = "restruct_btn_get";
+            this.restruct_btn_get.Size = new System.Drawing.Size(100, 23);
+            this.restruct_btn_get.TabIndex = 2;
+            this.restruct_btn_get.Text = "过滤get包";
+            this.restruct_btn_get.UseVisualStyleBackColor = true;
+            this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
+            // 
+            // restruct_title
+            // 
+            this.restruct_title.AutoSize = true;
+            this.restruct_title.Location = new System.Drawing.Point(4, 7);
+            this.restruct_title.Name = "restruct_title";
+            this.restruct_title.Size = new System.Drawing.Size(29, 12);
+            this.restruct_title.TabIndex = 0;
+            this.restruct_title.Text = "选中";
             // 
             // Form1
             // 
