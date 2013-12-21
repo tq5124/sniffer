@@ -172,6 +172,10 @@ namespace Sniffer
 
                                 //颜色
                                 this.color = "YellowGreen";
+                                if (this.tcp_info["Checksum(校验和)"] != this.tcp_info["tcpPacket计算校验和函数计算结果"])
+                                {
+                                    this.color = "Red";
+                                }
                                 //简易信息
                                 this.info = tcp_info["SourcePort(源端口)"] + " → " + tcp_info["DestinationPort(目的端口)"] + ((tcp_info["FIN"] == "True") ? " [FIN] " : "") + ((tcp_info["RST"] == "True") ? " [RST] " : "") + ((tcp_info["SYN"] == "True") ? " [SYN] " : "") + ((tcp_info["ACK"] == "True") ? " [ACK] " : "") + "Seq=" + tcp_info["SequenceNumber(序号)"] + " Ack=" + tcp_info["AcknowledgmentNumber(确认序号)"] + " Win=" + tcp_info["WindowSize(窗口)"];
 

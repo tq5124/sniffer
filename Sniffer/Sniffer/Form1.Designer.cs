@@ -62,14 +62,18 @@
             this.display_title = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.restruct_btn_get = new System.Windows.Forms.Button();
-            this.restruct_get = new System.Windows.Forms.ListBox();
             this.restruct_title = new System.Windows.Forms.Label();
+            this.restruct_get = new System.Windows.Forms.DataGridView();
+            this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dport = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.message = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).BeginInit();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -234,7 +238,7 @@
             this.tab_multi.Location = new System.Drawing.Point(717, 12);
             this.tab_multi.Name = "tab_multi";
             this.tab_multi.SelectedIndex = 0;
-            this.tab_multi.Size = new System.Drawing.Size(324, 442);
+            this.tab_multi.Size = new System.Drawing.Size(380, 442);
             this.tab_multi.TabIndex = 6;
             // 
             // tabPage1
@@ -342,7 +346,8 @@
             "protocol",
             "DF",
             "MF",
-            "application_data"});
+            "application_data",
+            "validate_checksum"});
             this.filter_key.Location = new System.Drawing.Point(6, 10);
             this.filter_key.Name = "filter_key";
             this.filter_key.Size = new System.Drawing.Size(112, 20);
@@ -380,35 +385,25 @@
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.restruct_btn_get);
             this.tabPage3.Controls.Add(this.restruct_get);
+            this.tabPage3.Controls.Add(this.restruct_btn_get);
             this.tabPage3.Controls.Add(this.restruct_title);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(316, 416);
+            this.tabPage3.Size = new System.Drawing.Size(372, 416);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "数据报重组";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // restruct_btn_get
             // 
-            this.restruct_btn_get.Location = new System.Drawing.Point(203, 5);
+            this.restruct_btn_get.Location = new System.Drawing.Point(256, 3);
             this.restruct_btn_get.Name = "restruct_btn_get";
             this.restruct_btn_get.Size = new System.Drawing.Size(100, 23);
             this.restruct_btn_get.TabIndex = 2;
-            this.restruct_btn_get.Text = "button9";
+            this.restruct_btn_get.Text = "过滤get包";
             this.restruct_btn_get.UseVisualStyleBackColor = true;
             this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
-            // 
-            // restruct_get
-            // 
-            this.restruct_get.FormattingEnabled = true;
-            this.restruct_get.ItemHeight = 12;
-            this.restruct_get.Location = new System.Drawing.Point(7, 34);
-            this.restruct_get.Name = "restruct_get";
-            this.restruct_get.Size = new System.Drawing.Size(296, 184);
-            this.restruct_get.TabIndex = 1;
-            this.restruct_get.SelectedIndexChanged += new System.EventHandler(this.restruct_get_SelectedIndexChanged);
             // 
             // restruct_title
             // 
@@ -419,11 +414,47 @@
             this.restruct_title.TabIndex = 0;
             this.restruct_title.Text = "选中";
             // 
+            // restruct_get
+            // 
+            this.restruct_get.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.restruct_get.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.restruct_get.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.index,
+            this.dport,
+            this.message});
+            this.restruct_get.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.restruct_get.EnableHeadersVisualStyles = false;
+            this.restruct_get.Location = new System.Drawing.Point(6, 39);
+            this.restruct_get.Name = "restruct_get";
+            this.restruct_get.RowHeadersVisible = false;
+            this.restruct_get.RowTemplate.Height = 23;
+            this.restruct_get.Size = new System.Drawing.Size(350, 212);
+            this.restruct_get.TabIndex = 3;
+            this.restruct_get.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.restruct_get_CellContentClick);
+            // 
+            // index
+            // 
+            this.index.HeaderText = "index";
+            this.index.Name = "index";
+            this.index.Width = 50;
+            // 
+            // dport
+            // 
+            this.dport.HeaderText = "sport";
+            this.dport.Name = "dport";
+            this.dport.Width = 50;
+            // 
+            // message
+            // 
+            this.message.HeaderText = "message";
+            this.message.Name = "message";
+            this.message.Width = 190;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1056, 475);
+            this.ClientSize = new System.Drawing.Size(1109, 475);
             this.Controls.Add(this.tab_multi);
             this.Controls.Add(this.treeView1);
             this.Controls.Add(this.dataGridView1);
@@ -450,6 +481,7 @@
             this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -492,7 +524,10 @@
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Label restruct_title;
         private System.Windows.Forms.Button restruct_btn_get;
-        private System.Windows.Forms.ListBox restruct_get;
+        private System.Windows.Forms.DataGridView restruct_get;
+        private System.Windows.Forms.DataGridViewTextBoxColumn index;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dport;
+        private System.Windows.Forms.DataGridViewTextBoxColumn message;
     }
 }
 

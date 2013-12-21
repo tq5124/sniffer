@@ -139,7 +139,7 @@ namespace Sniffer
                 }
             }
             else
-            {
+            {/*
                 int index = this.dataGridView1.Rows.Add();
                 this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
                 this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
@@ -150,7 +150,7 @@ namespace Sniffer
                 this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
 
                 this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
-            }
+            */}
         }
         /// <summary>
         /// 抓包后更新UI显示
@@ -470,6 +470,11 @@ namespace Sniffer
                     if (Packet.application_info.Count > 0)
                         pac_value.Add(Packet.application_info["Data"]);
                     break;
+                case "validate_checksum":
+                    if (Packet.color == "Red")
+                        return false ^ (oper == "!=");
+                    else
+                        return true ^ (oper =="!=");
                 default:
                     break;
             }
@@ -683,27 +688,36 @@ namespace Sniffer
 
         private void restruct_btn_get_Click(object sender, EventArgs e)
         {
+            this.restruct_get.Rows.Clear();
             for (int index = 0; index < this.packets.Count; index++)
             {
                 packet Packet = (packet)this.packets[index];
                 if (Packet.info.IndexOf("GET") == 0)
                 {
-                    this.restruct_get.Items.Add(Packet.info);
+                    int i= this.restruct_get.Rows.Add();
+                    this.restruct_get.Rows[i].Cells[0].Value = index;
+                    this.restruct_get.Rows[i].Cells[1].Value = Packet.tcp_info["SourcePort(源端口)"];
+                    this.restruct_get.Rows[i].Cells[2].Value = Packet.info;
                 }
             }
         }
 
-        private void restruct_get_SelectedIndexChanged(object sender, EventArgs e)
+        private void restruct_get_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            // 去除已有的port过滤规则
             foreach (DataGridViewRow i in this.filter_rule.Rows)
             {
                 if (i.Cells[0].Value.ToString() == "port")
                     this.filter_rule.Rows.Remove(i);
             }
-            if (this.restruct_get.SelectedItem == null)
+            if (this.restruct_get.SelectedRows == null)
                 return;
-            string port = this.restruct_get.SelectedItem.ToString().Substring(5, this.restruct_get.SelectedItem.ToString().IndexOf(" ") - 5);
+
+            // 添加port过滤
+            string port = this.restruct_get.Rows[e.RowIndex].Cells[1].Value.ToString();
             filter_apply_newRule("port", "==", port);
+
+            // 选中get请求中的tcp segment
         }
     }
 }
