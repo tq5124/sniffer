@@ -708,10 +708,9 @@ namespace Sniffer
             // 选中get请求中的tcp segment
             int startGet = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
             int endGet = (e.RowIndex == this.restruct_get.Rows.Count - 1) ? int.Parse((this.dataGridView1.RowCount-1).ToString()) : int.Parse(this.restruct_get.Rows[e.RowIndex+1].Cells[0].Value.ToString());
-            this.display_text.Text = "";
+            this.restruct_display.Text = "";
             Dictionary<long, string> text = new Dictionary<long,string>();
             List<long> text_seq = new List<long>();
-            this.display_title.Text = this.restruct_get.Rows[e.RowIndex].Cells[2].Value.ToString();
             for (int index = startGet; index < endGet; index++)
             {
                 packet temp = (packet)this.packets[index];
@@ -736,7 +735,7 @@ namespace Sniffer
             text_seq.Sort();
             foreach (long i in text_seq)
             {
-                this.display_text.Text += text[i];
+                this.restruct_display.Text += text[i];
             }
         }
     }

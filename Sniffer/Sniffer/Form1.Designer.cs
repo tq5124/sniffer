@@ -57,21 +57,17 @@
             this.filter_btn_clear = new System.Windows.Forms.Button();
             this.filter_value = new System.Windows.Forms.TextBox();
             this.filter_key = new System.Windows.Forms.ComboBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.display_text = new System.Windows.Forms.TextBox();
-            this.display_title = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.restruct_get = new System.Windows.Forms.DataGridView();
             this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dport = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.message = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.restruct_btn_get = new System.Windows.Forms.Button();
-            this.restruct_title = new System.Windows.Forms.Label();
+            this.restruct_display = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).BeginInit();
-            this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).BeginInit();
             this.SuspendLayout();
@@ -233,7 +229,6 @@
             // tab_multi
             // 
             this.tab_multi.Controls.Add(this.tabPage1);
-            this.tab_multi.Controls.Add(this.tabPage2);
             this.tab_multi.Controls.Add(this.tabPage3);
             this.tab_multi.Location = new System.Drawing.Point(717, 12);
             this.tab_multi.Name = "tab_multi";
@@ -352,46 +347,16 @@
             this.filter_key.TabIndex = 2;
             this.filter_key.SelectedIndexChanged += new System.EventHandler(this.filter_key_SelectedIndexChanged);
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.display_text);
-            this.tabPage2.Controls.Add(this.display_title);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(372, 416);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "应用层数据";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // display_text
-            // 
-            this.display_text.Location = new System.Drawing.Point(9, 36);
-            this.display_text.Multiline = true;
-            this.display_text.Name = "display_text";
-            this.display_text.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.display_text.Size = new System.Drawing.Size(281, 169);
-            this.display_text.TabIndex = 1;
-            // 
-            // display_title
-            // 
-            this.display_title.AutoSize = true;
-            this.display_title.Location = new System.Drawing.Point(7, 7);
-            this.display_title.Name = "display_title";
-            this.display_title.Size = new System.Drawing.Size(161, 12);
-            this.display_title.TabIndex = 0;
-            this.display_title.Text = "在左边选择需要展示数据的包";
-            // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.restruct_display);
             this.tabPage3.Controls.Add(this.restruct_get);
             this.tabPage3.Controls.Add(this.restruct_btn_get);
-            this.tabPage3.Controls.Add(this.restruct_title);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Size = new System.Drawing.Size(372, 416);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "数据报检测";
+            this.tabPage3.Text = "数据报重组";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // restruct_get
@@ -408,7 +373,7 @@
             this.restruct_get.Name = "restruct_get";
             this.restruct_get.RowHeadersVisible = false;
             this.restruct_get.RowTemplate.Height = 23;
-            this.restruct_get.Size = new System.Drawing.Size(350, 212);
+            this.restruct_get.Size = new System.Drawing.Size(350, 208);
             this.restruct_get.TabIndex = 3;
             this.restruct_get.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.restruct_get_CellContentClick);
             // 
@@ -440,14 +405,14 @@
             this.restruct_btn_get.UseVisualStyleBackColor = true;
             this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
             // 
-            // restruct_title
+            // restruct_display
             // 
-            this.restruct_title.AutoSize = true;
-            this.restruct_title.Location = new System.Drawing.Point(4, 7);
-            this.restruct_title.Name = "restruct_title";
-            this.restruct_title.Size = new System.Drawing.Size(29, 12);
-            this.restruct_title.TabIndex = 0;
-            this.restruct_title.Text = "选中";
+            this.restruct_display.Location = new System.Drawing.Point(6, 257);
+            this.restruct_display.Multiline = true;
+            this.restruct_display.Name = "restruct_display";
+            this.restruct_display.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.restruct_display.Size = new System.Drawing.Size(297, 146);
+            this.restruct_display.TabIndex = 4;
             // 
             // Form1
             // 
@@ -476,8 +441,6 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).EndInit();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).EndInit();
@@ -506,14 +469,11 @@
         private System.Windows.Forms.Button filter_btn_clear;
         private System.Windows.Forms.TextBox filter_value;
         private System.Windows.Forms.ComboBox filter_key;
-        private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.ComboBox filter_oper;
         private System.Windows.Forms.DataGridView filter_rule;
         private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_key;
         private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_oper;
         private System.Windows.Forms.DataGridViewTextBoxColumn filter_rule_value;
-        private System.Windows.Forms.TextBox display_text;
-        private System.Windows.Forms.Label display_title;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
@@ -521,12 +481,12 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
         private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.Label restruct_title;
         private System.Windows.Forms.Button restruct_btn_get;
         private System.Windows.Forms.DataGridView restruct_get;
         private System.Windows.Forms.DataGridViewTextBoxColumn index;
         private System.Windows.Forms.DataGridViewTextBoxColumn dport;
         private System.Windows.Forms.DataGridViewTextBoxColumn message;
+        private System.Windows.Forms.TextBox restruct_display;
     }
 }
 
