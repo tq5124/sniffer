@@ -428,7 +428,7 @@ namespace Sniffer
                                     }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                         {
                                             headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
                                             int i = ssHeader.IndexOf("\r\n\r\n");
@@ -446,7 +446,7 @@ namespace Sniffer
 
 
                                     //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
-                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                    if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                     {
                                         this.protocol = "HTTP";
                                         this.color = "YellowGreen";
