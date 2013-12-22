@@ -314,7 +314,7 @@ namespace Sniffer
                             catch (Exception e)
                             {
                                 this.info = "IPV6 to be continued";
-                                System.Windows.Forms.MessageBox.Show(e.Message);
+                                Console.WriteLine(e.Message);
                             }
                             
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
@@ -332,7 +332,7 @@ namespace Sniffer
                                 {
                                     this.icmp_info.Add("Type(类型)", type);
                                     this.info = type;
-                                    System.Windows.Forms.MessageBox.Show(e.Message);
+                                    Console.WriteLine(e.Message);
                                 }
                                 
                                 this.icmp_info.Add("Code(代码)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
