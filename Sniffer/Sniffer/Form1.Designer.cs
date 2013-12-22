@@ -344,9 +344,7 @@
             "ip_version",
             "port",
             "protocol",
-            "DF",
-            "MF",
-            "application_data",
+            "info_start",
             "validate_checksum"});
             this.filter_key.Location = new System.Drawing.Point(6, 10);
             this.filter_key.Name = "filter_key";
@@ -393,7 +391,7 @@
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Size = new System.Drawing.Size(372, 416);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "数据报重组";
+            this.tabPage3.Text = "数据报检测";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // restruct_get

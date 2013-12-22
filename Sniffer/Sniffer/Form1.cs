@@ -460,6 +460,9 @@ namespace Sniffer
                         return false ^ (oper == "!=");
                     else
                         return true ^ (oper =="!=");
+                case "info_start":
+                    pac_value.Add(Packet.info.Substring(0, value.Length));
+                    break;
                 default:
                     break;
             }
@@ -492,7 +495,7 @@ namespace Sniffer
         {
             foreach (string i in arr)
             {
-                if (i.IndexOf(find) > 0)
+                if (i.IndexOf(find) >= 0)
                     return true;
             }
             return false;
