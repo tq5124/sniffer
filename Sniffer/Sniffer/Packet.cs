@@ -239,11 +239,19 @@ namespace Sniffer
                                         }
                                         else
                                         {
-                                            datatext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
+                                            datatext = ssHeader.Substring(0, ssHeader.Length);
                                         }
                                     }
-
-
+                                    if (bytetext.IndexOf("0D0A0D0A") >= 0)
+                                    {
+                                        string databytes = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
+                                        datatext = databytes;
+                                    }
+                                    else
+                                    {
+                                        datatext = bytetext;
+                                    }
+                                                                           
                                     //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
                                     if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                     {
