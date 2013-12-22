@@ -219,33 +219,16 @@ namespace Sniffer
                                     var httpData = tcpPacket.PayloadData;
                                     string headertext = "";
                                     string datatext = "";
-                                    string bytetext = "";
-                                    string ssHeader = System.Text.Encoding.Default.GetString(httpData);
+                                    string bytetext = "";                                    
                                     foreach (byte i in httpData)
                                     {
                                         bytetext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
                                     }
-                                    if (ssHeader.IndexOf("\r\n\r\n") > 0)
-                                    {
-                                        if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
-                                        {
-                                            headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
-                                            int i = ssHeader.IndexOf("\r\n\r\n");
-                                            if (ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length < ssHeader.Length)
-                                            {
-                                                datatext = ssHeader.Substring(ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length, ssHeader.Length - ssHeader.IndexOf("\r\n\r\n") - "\r\n\r\n".Length);
-
-                                            }
-                                        }
-                                        else
-                                        {
-                                            datatext = ssHeader.Substring(0, ssHeader.Length);
-                                        }
-                                    }
                                     if (bytetext.IndexOf("0D0A0D0A") >= 0)
                                     {
-                                        string databytes = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
-                                        datatext = databytes;
+                                        headertext = System.Text.Encoding.Default.GetString(httpData);
+                                        headertext = headertext.Substring(0, headertext.IndexOf("\r\n\r\n"));
+                                        datatext = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
                                     }
                                     else
                                     {
@@ -253,22 +236,22 @@ namespace Sniffer
                                     }
                                                                            
                                     //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
-                                    if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
+                                    if (headertext.IndexOf("HTTP") == 0 || headertext.IndexOf("GET") == 0 || headertext.IndexOf("POST") == 0)
                                     {
                                         this.protocol = "HTTP";
                                         this.color = "YellowGreen";
-                                        this.info = headertext.Substring(0, (headertext.IndexOf('\n') >= 0) ? headertext.IndexOf('\n') : headertext.Length);
+                                        this.info = headertext.Substring(0, headertext.IndexOf("\r\n"));
 
                                         this.application_info.Add("ApplicationType", "HTTP");
                                         this.application_info.Add("Head", headertext);
                                         this.application_info.Add("Data", datatext);
-                                        this.application_info.Add("All", ssHeader);
+                                        this.application_info.Add("All", System.Text.Encoding.Default.GetString(httpData));
                                         this.application_info.Add("Byte", bytetext);
                                     }
-                                    else if (ssHeader.Length > 0)
+                                    else if (datatext.Length > 0)
                                     {
                                         this.info = "TCP segment of a reassembled PDU";
-                                        this.tcp_info.Add("TCP segment data", ssHeader);
+                                        this.tcp_info.Add("TCP segment data", datatext);
                                     }
                                 }
                             }
@@ -429,47 +412,38 @@ namespace Sniffer
                                     string headertext = "";
                                     string datatext = "";
                                     string bytetext = "";
-                                    string ssHeader = System.Text.Encoding.Default.GetString(httpData);
                                     foreach (byte i in httpData)
                                     {
                                         bytetext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
                                     }
-                                    if (ssHeader.IndexOf("\r\n\r\n") > 0)
+                                    if (bytetext.IndexOf("0D0A0D0A") >= 0)
                                     {
-                                        if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
-                                        {
-                                            headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
-                                            int i = ssHeader.IndexOf("\r\n\r\n");
-                                            if (ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length < ssHeader.Length)
-                                            {
-                                                datatext = ssHeader.Substring(ssHeader.IndexOf("\r\n\r\n") + "\r\n\r\n".Length, ssHeader.Length - ssHeader.IndexOf("\r\n\r\n") - "\r\n\r\n".Length);
-
-                                            }
-                                        }
-                                        else
-                                        {
-                                            datatext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
-                                        }
+                                        headertext = System.Text.Encoding.Default.GetString(httpData);
+                                        headertext = headertext.Substring(0, headertext.IndexOf("\r\n\r\n"));
+                                        datatext = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
+                                    }
+                                    else
+                                    {
+                                        datatext = bytetext;
                                     }
 
-
                                     //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
-                                    if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
+                                    if (headertext.IndexOf("HTTP") == 0 || headertext.IndexOf("GET") == 0 || headertext.IndexOf("POST") == 0)
                                     {
                                         this.protocol = "HTTP";
                                         this.color = "YellowGreen";
-                                        this.info = headertext.Substring(0, (headertext.IndexOf('\n') >= 0) ? headertext.IndexOf('\n') : headertext.Length);
+                                        this.info = headertext.Substring(0, headertext.IndexOf("\r\n"));
 
                                         this.application_info.Add("ApplicationType", "HTTP");
                                         this.application_info.Add("Head", headertext);
                                         this.application_info.Add("Data", datatext);
-                                        this.application_info.Add("All", ssHeader);
+                                        this.application_info.Add("All", System.Text.Encoding.Default.GetString(httpData));
                                         this.application_info.Add("Byte", bytetext);
                                     }
-                                    else if (ssHeader.Length > 0)
+                                    else if (datatext.Length > 0)
                                     {
                                         this.info = "TCP segment of a reassembled PDU";
-                                        this.tcp_info.Add("TCP segment data", ssHeader);
+                                        this.tcp_info.Add("TCP segment data", datatext);
                                     }
                                 }
                             }
