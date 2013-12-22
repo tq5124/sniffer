@@ -64,6 +64,7 @@
             this.message = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.restruct_btn_get = new System.Windows.Forms.Button();
             this.restruct_display = new System.Windows.Forms.TextBox();
+            this.restruct_save = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -349,6 +350,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.restruct_save);
             this.tabPage3.Controls.Add(this.restruct_display);
             this.tabPage3.Controls.Add(this.restruct_get);
             this.tabPage3.Controls.Add(this.restruct_btn_get);
@@ -411,8 +413,18 @@
             this.restruct_display.Multiline = true;
             this.restruct_display.Name = "restruct_display";
             this.restruct_display.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.restruct_display.Size = new System.Drawing.Size(297, 146);
+            this.restruct_display.Size = new System.Drawing.Size(350, 122);
             this.restruct_display.TabIndex = 4;
+            // 
+            // restruct_save
+            // 
+            this.restruct_save.Location = new System.Drawing.Point(280, 386);
+            this.restruct_save.Name = "restruct_save";
+            this.restruct_save.Size = new System.Drawing.Size(75, 23);
+            this.restruct_save.TabIndex = 5;
+            this.restruct_save.Text = "保存文件";
+            this.restruct_save.UseVisualStyleBackColor = true;
+            this.restruct_save.Click += new System.EventHandler(this.restruct_save_Click);
             // 
             // Form1
             // 
@@ -487,6 +499,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dport;
         private System.Windows.Forms.DataGridViewTextBoxColumn message;
         private System.Windows.Forms.TextBox restruct_display;
+        private System.Windows.Forms.Button restruct_save;
     }
 }
 

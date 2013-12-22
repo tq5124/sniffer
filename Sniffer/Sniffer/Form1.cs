@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Collections;
 using SharpPcap;
 using System.Threading;
+using System.IO;
 
 namespace Sniffer
 {
@@ -707,7 +708,7 @@ namespace Sniffer
 
             // 选中get请求中的tcp segment
             int startGet = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
-            int endGet = (e.RowIndex == this.restruct_get.Rows.Count - 1) ? int.Parse((this.dataGridView1.RowCount-1).ToString()) : int.Parse(this.restruct_get.Rows[e.RowIndex+1].Cells[0].Value.ToString());
+            int endGet = (e.RowIndex == this.restruct_get.Rows.Count - 2) ? int.Parse((this.dataGridView1.RowCount-1).ToString()) : int.Parse(this.restruct_get.Rows[e.RowIndex+1].Cells[0].Value.ToString());
             this.restruct_display.Text = "";
             Dictionary<long, string> text = new Dictionary<long,string>();
             List<long> text_seq = new List<long>();
@@ -737,6 +738,28 @@ namespace Sniffer
             {
                 this.restruct_display.Text += text[i];
             }
+            // 保存文件名
+            string fileName = this.restruct_get.Rows[e.RowIndex].Cells[2].Value.ToString().Split(' ')[1];
+            this.restruct_display.Tag = fileName.Substring(fileName.LastIndexOf("/") + 1);
+        }
+
+        private void restruct_save_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = this.restruct_display.Tag.ToString();
+            saveFileDialog.Filter = "所有文件|*.*";
+            saveFileDialog.FilterIndex = 2;
+            saveFileDialog.RestoreDirectory = true;
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //实例化一个文件流--->与写入文件相关联
+                FileStream fs = new FileStream(saveFileDialog.FileName, FileMode.Create);
+                //获得字节数组
+                byte[] data = new UTF8Encoding().GetBytes(this.restruct_display.Text);
+                fs.Write(data, 0, data.Length);
+                fs.Flush();
+                fs.Close();
+            }　
         }
     }
 }
