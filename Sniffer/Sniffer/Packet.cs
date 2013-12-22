@@ -227,7 +227,7 @@ namespace Sniffer
                                     }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                         {
                                             headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
                                             int i = ssHeader.IndexOf("\r\n\r\n");
@@ -245,7 +245,7 @@ namespace Sniffer
 
 
                                     //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
-                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                    if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                     {
                                         this.protocol = "HTTP";
                                         this.color = "YellowGreen";
@@ -314,7 +314,7 @@ namespace Sniffer
                             catch (Exception e)
                             {
                                 this.info = "IPV6 to be continued";
-                                System.Windows.Forms.MessageBox.Show(e.Message);
+                                Console.WriteLine(e.Message);
                             }
                             
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
@@ -332,7 +332,7 @@ namespace Sniffer
                                 {
                                     this.icmp_info.Add("Type(类型)", type);
                                     this.info = type;
-                                    System.Windows.Forms.MessageBox.Show(e.Message);
+                                    Console.WriteLine(e.Message);
                                 }
                                 
                                 this.icmp_info.Add("Code(代码)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
@@ -428,7 +428,7 @@ namespace Sniffer
                                     }
                                     if (ssHeader.IndexOf("\r\n\r\n") > 0)
                                     {
-                                        if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                        if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                         {
                                             headertext = ssHeader.Substring(0, ssHeader.IndexOf("\r\n\r\n"));
                                             int i = ssHeader.IndexOf("\r\n\r\n");
@@ -446,7 +446,7 @@ namespace Sniffer
 
 
                                     //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
-                                    if (ssHeader.IndexOf("HTTP") >= 0 || ssHeader.IndexOf("GET") >= 0 || ssHeader.IndexOf("POST") >= 0)
+                                    if (ssHeader.IndexOf("HTTP") == 0 || ssHeader.IndexOf("GET") == 0 || ssHeader.IndexOf("POST") == 0)
                                     {
                                         this.protocol = "HTTP";
                                         this.color = "YellowGreen";
