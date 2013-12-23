@@ -277,14 +277,157 @@ namespace Sniffer
 
                                 //判断具体应用层
                                 //DNS待完成
-                                if (udp_info["SourcePort(源端口)"] == "53")
+                                if (udp_info["SourcePort(源端口)"] == "53" || udp_info["DestinationPort(目的端口)"] == "53")
                                 {
                                     this.protocol = "DNS";
                                     this.color = "SkyBlue";
-                                    this.info = "DNS to be continued";
+
+                                    var dnsdata = udpPacket.PayloadData;
 
                                     this.application_info.Add("ApplicationType", "DNS");
-                                    this.application_info.Add("Data", "");
+                                    this.application_info.Add("Transaction ID", "0x" + Convert.ToString(dnsdata[0], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(dnsdata[1], 16).ToUpper().PadLeft(2, '0'));
+                                    this.application_info.Add("QR", ((dnsdata[2] & 128) >> 7).ToString());
+                                    this.application_info.Add("opcode", ((dnsdata[2] & 120) >> 3).ToString());
+                                    this.application_info.Add("AA", ((dnsdata[2] & 4) >> 2).ToString());
+                                    this.application_info.Add("TC", ((dnsdata[2] & 2) >> 1).ToString());
+                                    this.application_info.Add("RD", (dnsdata[2] & 1).ToString());
+                                    this.application_info.Add("RA", ((dnsdata[3] & 128) >> 7).ToString());
+                                    this.application_info.Add("zero", ((dnsdata[3] & 112) >> 4).ToString());
+                                    this.application_info.Add("rcode", (dnsdata[3] & 15).ToString());
+                                    this.application_info.Add("Questions", ((dnsdata[4] << 8) + dnsdata[5]).ToString());
+                                    this.application_info.Add("Answer RRs", ((dnsdata[6] << 8) + dnsdata[7]).ToString());
+                                    this.application_info.Add("Authority RRs", ((dnsdata[8] << 8) + dnsdata[9]).ToString());
+                                    this.application_info.Add("Additional RRs", ((dnsdata[10] << 8) + dnsdata[11]).ToString());
+
+                                    if (dnsdata.Length > 12)
+                                    {
+                                        int offset = 12;
+                                        int labelLen;
+                                        string Queries_result = "";
+                                        string Answers_result = "";
+                                        string Authoritative_result = "";
+                                        string Additional_result = "";
+                                        for (int i = 0; i < int.Parse(this.application_info["Questions"]); i++)
+                                        {
+                                            //查询名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //查询类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //查询类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            Queries_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n";
+                                        }
+                                        if (Queries_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Queries", Queries_result);
+                                        }
+                                        for (int i = 0; i < int.Parse(this.application_info["Answer RRs"]); i++)
+                                        {
+                                            //域名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //生存时间
+                                            offset++;
+                                            string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //资源数据长度
+                                            offset++;
+                                            string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            //数据解析，待完成
+                                            string data = "";
+                                            for (int j = 0; j < int.Parse(Length); j++)
+                                            {
+                                                data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
+                                            }
+                                            Answers_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                                            offset += int.Parse(Length);
+                                        }
+                                        if (Answers_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Answers", Answers_result);
+                                        }
+                                        for (int i = 0; i < int.Parse(this.application_info["Authority RRs"]); i++)
+                                        {
+                                            //域名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //生存时间
+                                            offset++;
+                                            string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //资源数据长度
+                                            offset++;
+                                            string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            //数据解析，待完成
+                                            string data = "";
+                                            for (int j = 0; j < int.Parse(Length); j++)
+                                            {
+                                                data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
+                                            }
+                                            Authoritative_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                                            offset += int.Parse(Length);
+                                        }
+                                        if (Authoritative_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Authoritative nameservers", Authoritative_result);
+                                        }
+                                        for (int i = 0; i < int.Parse(this.application_info["Additional RRs"]); i++)
+                                        {
+                                            //域名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //生存时间
+                                            offset++;
+                                            string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //资源数据长度
+                                            offset++;
+                                            string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            //数据解析，待完成
+                                            string data = "";
+                                            for (int j = 0; j < int.Parse(Length); j++)
+                                            {
+                                                data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
+                                            }
+                                            Additional_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                                            offset += int.Parse(Length);
+                                        }
+                                        if (Additional_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Additional records", Additional_result);
+                                        }
+                                    }
+
+                                    if (this.application_info["opcode"] == "0")
+                                    {
+                                        this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"];
+                                    }
+                                    else
+                                    {
+                                        this.info = "DNS to be continued";
+                                    }
                                 }
                             }
                         }
@@ -476,14 +619,157 @@ namespace Sniffer
 
                                 //判断具体应用层
                                 //DNS待完成
-                                if (udp_info["SourcePort(源端口)"] == "53")
+                                if (udp_info["SourcePort(源端口)"] == "53" || udp_info["DestinationPort(目的端口)"] == "53")
                                 {
                                     this.protocol = "DNS";
                                     this.color = "SkyBlue";
-                                    this.info = "DNS to be continued";
+                                    
+                                    var dnsdata = udpPacket.PayloadData;
 
                                     this.application_info.Add("ApplicationType", "DNS");
-                                    this.application_info.Add("Data", "");
+                                    this.application_info.Add("Transaction ID", "0x" + Convert.ToString(dnsdata[0], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(dnsdata[1], 16).ToUpper().PadLeft(2, '0'));
+                                    this.application_info.Add("QR", ((dnsdata[2] & 128) >> 7).ToString());
+                                    this.application_info.Add("opcode", ((dnsdata[2] & 120) >> 3).ToString());
+                                    this.application_info.Add("AA", ((dnsdata[2] & 4) >> 2).ToString());
+                                    this.application_info.Add("TC", ((dnsdata[2] & 2) >> 1).ToString());
+                                    this.application_info.Add("RD", (dnsdata[2] & 1).ToString());
+                                    this.application_info.Add("RA", ((dnsdata[3] & 128) >> 7).ToString());
+                                    this.application_info.Add("zero", ((dnsdata[3] & 112) >> 4).ToString());
+                                    this.application_info.Add("rcode", (dnsdata[3] & 15).ToString());
+                                    this.application_info.Add("Questions", ((dnsdata[4] << 8) + dnsdata[5]).ToString());
+                                    this.application_info.Add("Answer RRs", ((dnsdata[6] << 8) + dnsdata[7]).ToString());
+                                    this.application_info.Add("Authority RRs", ((dnsdata[8] << 8) + dnsdata[9]).ToString());
+                                    this.application_info.Add("Additional RRs", ((dnsdata[10] << 8) + dnsdata[11]).ToString());
+
+                                    if (dnsdata.Length > 12)
+                                    {
+                                        int offset = 12;
+                                        int labelLen;
+                                        string Queries_result = "";
+                                        string Answers_result = "";
+                                        string Authoritative_result = "";
+                                        string Additional_result = "";
+                                        for (int i = 0; i < int.Parse(this.application_info["Questions"]); i++)
+                                        {                                            
+                                            //查询名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //查询类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //查询类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            Queries_result += "Name: " + name + "\r\n"+ "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n";
+                                        }
+                                        if (Queries_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Queries", Queries_result);
+                                        }
+                                        for (int i = 0; i < int.Parse(this.application_info["Answer RRs"]); i++)
+                                        {                                            
+                                            //域名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //生存时间
+                                            offset++;
+                                            string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //资源数据长度
+                                            offset++;
+                                            string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            //数据解析，待完成
+                                            string data = "";
+                                            for (int j = 0; j < int.Parse(Length); j++)
+                                            {
+                                                data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
+                                            }
+                                            Answers_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                                            offset += int.Parse(Length);
+                                        }
+                                        if (Answers_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Answers", Answers_result);
+                                        } 
+                                        for (int i = 0; i < int.Parse(this.application_info["Authority RRs"]); i++)
+                                        {
+                                            //域名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //生存时间
+                                            offset++;
+                                            string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //资源数据长度
+                                            offset++;
+                                            string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            //数据解析，待完成
+                                            string data = "";
+                                            for (int j = 0; j < int.Parse(Length); j++)
+                                            {
+                                                data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
+                                            }
+                                            Authoritative_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                                            offset += int.Parse(Length);
+                                        }
+                                        if (Authoritative_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Authoritative nameservers", Authoritative_result);
+                                        }
+                                        for (int i = 0; i < int.Parse(this.application_info["Additional RRs"]); i++)
+                                        {
+                                            //域名
+                                            string name = GetLabelName(dnsdata, offset, out labelLen);
+                                            offset += labelLen;
+                                            //类型
+                                            offset++;
+                                            string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //类                                            
+                                            offset++;
+                                            string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //生存时间
+                                            offset++;
+                                            string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            //资源数据长度
+                                            offset++;
+                                            string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
+                                            offset++;
+                                            //数据解析，待完成
+                                            string data = "";
+                                            for (int j = 0; j < int.Parse(Length); j++)
+                                            {
+                                                data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
+                                            }
+                                            Additional_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                                            offset += int.Parse(Length);
+                                        }
+                                        if (Additional_result.Length > 0)
+                                        {
+                                            this.application_info.Add("Additional records", Additional_result);
+                                        }
+                                    }
+
+                                    if (this.application_info["opcode"] == "0")
+                                    {
+                                        this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"];
+                                    }
+                                    else
+                                    {
+                                        this.info = "DNS to be continued";
+                                    }
                                 }
                             }
                         }
@@ -511,6 +797,45 @@ namespace Sniffer
                     this.info = "Who has " + arp_info["TargetProtocolAddress(目标IP地址)"] + "?  Tell " + arp_info["SenderProtocolAddress(发送者IP地址)"];
                 }
             }
+        }
+
+        /// <summary>
+        /// DNS域名解析
+        /// </summary>
+        public static string GetLabelName(byte[] data, int offset, out int labelLen)
+        {
+            bool alreadyJump = false;
+            int seek = offset;
+            int len = data[seek];
+            labelLen = 0;
+            StringBuilder result = new StringBuilder(63);
+            while (len > 0 && seek < data.Length)
+            {
+                if (len > 191 && len < 255)
+                {
+                    if (alreadyJump)
+                    {
+                        labelLen = seek - offset;
+                        return result.ToString();
+                    }
+                    int tempLen;
+                    result.Append(GetLabelName(data, data[++seek] + (len - 192) * 256, out tempLen));
+                    alreadyJump = true;
+                    labelLen = seek - offset;
+                    return result.ToString();
+                }
+                else if (len < 64)
+                {
+                    for (; len > 0; len--)
+                    {
+                        result.Append((char)data[++seek]);
+                    }
+                    len = data[++seek];
+                    if (len > 0) result.Append(".");
+                }
+            }
+            labelLen = seek - offset;
+            return result.ToString();
         }
 
     }
