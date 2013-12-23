@@ -713,7 +713,7 @@ namespace Sniffer
             for (int i=getIndex; i < this.packets.Count; i++)
             {
                 packet temp = (packet)this.packets[i];
-                if (temp.tcp_info["SequenceNumber(序号)"] == answer){
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == answer){
                     answer = temp.tcp_info["AcknowledgmentNumber(确认序号)"];
                     break;
                 }
