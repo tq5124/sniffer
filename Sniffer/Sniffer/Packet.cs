@@ -228,7 +228,14 @@ namespace Sniffer
                                     {
                                         headertext = System.Text.Encoding.Default.GetString(httpData);
                                         headertext = headertext.Substring(0, headertext.IndexOf("\r\n\r\n"));
-                                        datatext = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
+                                        if (headertext.IndexOf("HTTP") == 0 || headertext.IndexOf("GET") == 0 || headertext.IndexOf("POST") == 0)
+                                        {
+                                            datatext = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
+                                        }
+                                        else
+                                        {
+                                            datatext = bytetext;
+                                        }
                                     }
                                     else
                                     {
@@ -420,7 +427,14 @@ namespace Sniffer
                                     {
                                         headertext = System.Text.Encoding.Default.GetString(httpData);
                                         headertext = headertext.Substring(0, headertext.IndexOf("\r\n\r\n"));
-                                        datatext = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
+                                        if (headertext.IndexOf("HTTP") == 0 || headertext.IndexOf("GET") == 0 || headertext.IndexOf("POST") == 0)
+                                        {
+                                            datatext = bytetext.Substring(bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length, bytetext.Length - bytetext.IndexOf("0D0A0D0A") - "0D0A0D0A".Length);
+                                        }
+                                        else 
+                                        {
+                                            datatext = bytetext;
+                                        }
                                     }
                                     else
                                     {
