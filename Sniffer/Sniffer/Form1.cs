@@ -706,31 +706,42 @@ namespace Sniffer
             string port = this.restruct_get.Rows[e.RowIndex].Cells[1].Value.ToString();
             filter_apply_newRule("port", "==", port);
 
-            // 选中get请求中的tcp segment
-            int startGet = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
-            int endGet = (e.RowIndex == this.restruct_get.Rows.Count - 2) ? int.Parse((this.dataGridView1.RowCount-1).ToString()) : int.Parse(this.restruct_get.Rows[e.RowIndex+1].Cells[0].Value.ToString());
+            // 找到符合get请求确认序号的http头
+            int getIndex = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
+            packet Packet = (packet)this.packets[getIndex];
+            string answer = Packet.tcp_info["AcknowledgmentNumber(确认序号)"];
+            for (int i=getIndex; i < this.packets.Count; i++)
+            {
+                packet temp = (packet)this.packets[i];
+                if (temp.tcp_info["SequenceNumber(序号)"] == answer){
+                    answer = temp.tcp_info["AcknowledgmentNumber(确认序号)"];
+                    break;
+                }
+            }
+            // 根据ack序号，所有具有相同ack序号的包都是数据报，直到客户端返回seq=ack的包
             this.restruct_display.Text = "";
             Dictionary<long, string> text = new Dictionary<long,string>();
             List<long> text_seq = new List<long>();
-            for (int index = startGet; index < endGet; index++)
+            for (int i = getIndex; i < this.packets.Count;i++ )
             {
-                packet temp = (packet)this.packets[index];
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["DestinationPort(目的端口)"] == port && temp.info == "TCP segment of a reassembled PDU")
+                packet temp = (packet)this.packets[i];
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["AcknowledgmentNumber(确认序号)"] == answer)
                 {
                     long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
-                    if (!text.ContainsKey(seq)){
+                    if (temp.tcp_info.ContainsKey("TCP segment data") && !text.ContainsKey(seq))
+                    {
                         text.Add(seq, temp.tcp_info["TCP segment data"]);
                         text_seq.Add(seq);
                     }
-                }
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["DestinationPort(目的端口)"] == port && temp.protocol == "HTTP")
-                {
-                    long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
-                    if (!text.ContainsKey(seq))
+                    else if (temp.application_info.ContainsKey("Data") && !text.ContainsKey(seq))
                     {
                         text.Add(seq, temp.application_info["Data"]);
                         text_seq.Add(seq);
                     }
+                }
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == answer)
+                {
+                    break;
                 }
             }
             text_seq.Sort();
@@ -760,6 +771,12 @@ namespace Sniffer
                 fs.Flush();
                 fs.Close();
             }　
+        }
+
+        private void restruct_translate_Click(object sender, EventArgs e)
+        {
+            byte[] byteArray = System.Text.Encoding.Default.GetBytes(this.restruct_display.Text);
+            this.restruct_display.Text = System.Text.Encoding.Default.GetString(byteArray);
         }
     }
 }
