@@ -317,6 +317,10 @@ namespace Sniffer
                     }
                 }
             }
+
+            // 更新display页面的报信息
+            this.display_title.Text = Packet.info;
+            this.display_text.Text = "";
         }
 
         // 递归遍历treeview的所有节点
@@ -746,6 +750,12 @@ namespace Sniffer
         {
             byte[] byteArray = System.Text.Encoding.Default.GetBytes(this.restruct_display.Text);
             this.restruct_display.Text = System.Text.Encoding.Default.GetString(byteArray);
+        }
+
+        private void treeView1_DoubleClick(object sender, EventArgs e)
+        {
+            this.tab_multi.SelectedIndex = 2;
+            this.display_text.Text = this.treeView1.SelectedNode.Text.Substring(this.treeView1.SelectedNode.Text.IndexOf(" : ")+3);
         }
     }
 }

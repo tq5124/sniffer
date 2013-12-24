@@ -58,6 +58,7 @@
             this.filter_value = new System.Windows.Forms.TextBox();
             this.filter_key = new System.Windows.Forms.ComboBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.restruct_translate = new System.Windows.Forms.Button();
             this.restruct_save = new System.Windows.Forms.Button();
             this.restruct_display = new System.Windows.Forms.TextBox();
             this.restruct_get = new System.Windows.Forms.DataGridView();
@@ -65,13 +66,16 @@
             this.dport = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.message = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.restruct_btn_get = new System.Windows.Forms.Button();
-            this.restruct_translate = new System.Windows.Forms.Button();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.display_text = new System.Windows.Forms.TextBox();
+            this.display_title = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filter_rule)).BeginInit();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).BeginInit();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -227,11 +231,13 @@
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(578, 153);
             this.treeView1.TabIndex = 4;
+            this.treeView1.DoubleClick += new System.EventHandler(this.treeView1_DoubleClick);
             // 
             // tab_multi
             // 
             this.tab_multi.Controls.Add(this.tabPage1);
             this.tab_multi.Controls.Add(this.tabPage3);
+            this.tab_multi.Controls.Add(this.tabPage2);
             this.tab_multi.Location = new System.Drawing.Point(717, 12);
             this.tab_multi.Name = "tab_multi";
             this.tab_multi.SelectedIndex = 0;
@@ -363,6 +369,16 @@
             this.tabPage3.Text = "数据报重组";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // restruct_translate
+            // 
+            this.restruct_translate.Location = new System.Drawing.Point(193, 386);
+            this.restruct_translate.Name = "restruct_translate";
+            this.restruct_translate.Size = new System.Drawing.Size(75, 23);
+            this.restruct_translate.TabIndex = 6;
+            this.restruct_translate.Text = "翻译";
+            this.restruct_translate.UseVisualStyleBackColor = true;
+            this.restruct_translate.Click += new System.EventHandler(this.restruct_translate_Click);
+            // 
             // restruct_save
             // 
             this.restruct_save.Location = new System.Drawing.Point(280, 386);
@@ -428,15 +444,32 @@
             this.restruct_btn_get.UseVisualStyleBackColor = true;
             this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
             // 
-            // restruct_translate
+            // tabPage2
             // 
-            this.restruct_translate.Location = new System.Drawing.Point(193, 386);
-            this.restruct_translate.Name = "restruct_translate";
-            this.restruct_translate.Size = new System.Drawing.Size(75, 23);
-            this.restruct_translate.TabIndex = 6;
-            this.restruct_translate.Text = "翻译";
-            this.restruct_translate.UseVisualStyleBackColor = true;
-            this.restruct_translate.Click += new System.EventHandler(this.restruct_translate_Click);
+            this.tabPage2.Controls.Add(this.display_text);
+            this.tabPage2.Controls.Add(this.display_title);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Size = new System.Drawing.Size(372, 416);
+            this.tabPage2.TabIndex = 3;
+            this.tabPage2.Text = "应用层数据";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // display_text
+            // 
+            this.display_text.Location = new System.Drawing.Point(6, 33);
+            this.display_text.Multiline = true;
+            this.display_text.Name = "display_text";
+            this.display_text.Size = new System.Drawing.Size(352, 214);
+            this.display_text.TabIndex = 1;
+            // 
+            // display_title
+            // 
+            this.display_title.AutoSize = true;
+            this.display_title.Location = new System.Drawing.Point(4, 10);
+            this.display_title.Name = "display_title";
+            this.display_title.Size = new System.Drawing.Size(0, 12);
+            this.display_title.TabIndex = 0;
             // 
             // Form1
             // 
@@ -468,6 +501,8 @@
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).EndInit();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -513,6 +548,9 @@
         private System.Windows.Forms.TextBox restruct_display;
         private System.Windows.Forms.Button restruct_save;
         private System.Windows.Forms.Button restruct_translate;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TextBox display_text;
+        private System.Windows.Forms.Label display_title;
     }
 }
 
