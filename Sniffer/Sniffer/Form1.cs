@@ -523,6 +523,8 @@ namespace Sniffer
         private void Form1_Load(object sender, EventArgs e)
         {
             CheckForIllegalCrossThreadCalls = false;
+            ToolTip tooltip1 = new ToolTip();
+            tooltip1.SetToolTip(this.treeView1, "双击字段显示详细信息\n选中字段以便比较不同包的同一字段");
         }
 
         private void filter_value_KeyPress(object sender, KeyPressEventArgs e)
