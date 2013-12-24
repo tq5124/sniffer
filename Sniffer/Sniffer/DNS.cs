@@ -33,6 +33,8 @@ namespace Sniffer
             this.application_info.Add("Authority RRs", ((dnsdata[8] << 8) + dnsdata[9]).ToString());
             this.application_info.Add("Additional RRs", ((dnsdata[10] << 8) + dnsdata[11]).ToString());
 
+            string question_additional_info = "";
+            string answer_additional_info = "";
             if (dnsdata.Length > 12)
             {
                 int offset = 12;
@@ -40,7 +42,7 @@ namespace Sniffer
                 string Queries_result = "";
                 string Answers_result = "";
                 string Authoritative_result = "";
-                string Additional_result = "";
+                string Additional_result = "";                
                 for (int i = 0; i < int.Parse(this.application_info["Questions"]); i++)
                 {
                     //查询名
@@ -53,6 +55,7 @@ namespace Sniffer
                     offset++;
                     string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
                     offset++;
+                    question_additional_info += type_analysis(Type) + " " + name + " ";
                     Queries_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n";
                 }
                 if (Queries_result.Length > 0)
@@ -80,6 +83,7 @@ namespace Sniffer
                     //数据解析
                     string data = data_analysis(dnsdata, offset, int.Parse(Length), type_analysis(Type));
                     Answers_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + type_analysis(Type) + ": " + data + "\r\n\r\n";
+                    answer_additional_info += type_analysis(Type) + " " + data + " ";
                     offset += int.Parse(Length);
                 }
                 if (Answers_result.Length > 0)
@@ -146,7 +150,7 @@ namespace Sniffer
             {
                 if (detail_protocol == "DNS" || detail_protocol == "LLMNR" || detail_protocol == "MDNS")
                 {
-                    this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"];
+                    this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"] + " " + (this.application_info["QR"] == "1" ? answer_additional_info : question_additional_info);
                 }
                 else if (detail_protocol == "NBNS")
                 {
