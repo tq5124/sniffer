@@ -32,6 +32,7 @@ namespace Sniffer
         private string filter;
         //抓到的所有包的所有信息
         private ArrayList packets;
+        private ArrayList files;
         //标定是否已保存的标志位
         private bool is_saved;
 
@@ -48,6 +49,7 @@ namespace Sniffer
             this.is_saved = false;
             //清除之前的数据
             this.packets = new ArrayList();
+            this.files = new ArrayList();
             this.dataGridView1.Rows.Clear();
             //读取要监听的网卡
             int eth = System.Int32.Parse(this.comboBox1.SelectedValue.ToString());
@@ -679,6 +681,7 @@ namespace Sniffer
         private void restruct_btn_get_Click(object sender, EventArgs e)
         {
             this.restruct_get.Rows.Clear();
+            this.files = new ArrayList();
             for (int index = 0; index < this.packets.Count; index++)
             {
                 packet Packet = (packet)this.packets[index];
@@ -688,8 +691,10 @@ namespace Sniffer
                     this.restruct_get.Rows[i].Cells[0].Value = index;
                     this.restruct_get.Rows[i].Cells[1].Value = Packet.tcp_info["SourcePort(源端口)"];
                     this.restruct_get.Rows[i].Cells[2].Value = Packet.info;
+                    this.files.Add(new Files());
                 }
             }
+            
         }
 
         private void restruct_get_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -707,48 +712,15 @@ namespace Sniffer
             string port = this.restruct_get.Rows[e.RowIndex].Cells[1].Value.ToString();
             filter_apply_newRule("port", "==", port);
 
-            // 找到符合get请求确认序号的http头
-            int getIndex = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
-            packet Packet = (packet)this.packets[getIndex];
-            string answer = Packet.tcp_info["AcknowledgmentNumber(确认序号)"];
-            for (int i=getIndex; i < this.packets.Count; i++)
+            // 如果没有建立files对象则update
+            if (this.files[e.RowIndex] != null)
             {
-                packet temp = (packet)this.packets[i];
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == answer){
-                    answer = temp.tcp_info["AcknowledgmentNumber(确认序号)"];
-                    break;
-                }
+                Files temp = (Files)this.files[e.RowIndex];
+                int getIndex = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
+                temp.update(this.packets, getIndex);
             }
-            // 根据ack序号，所有具有相同ack序号的包都是数据报，直到客户端返回seq=ack的包
-            this.restruct_display.Text = "";
-            Dictionary<long, string> text = new Dictionary<long,string>();
-            List<long> text_seq = new List<long>();
-            for (int i = getIndex; i < this.packets.Count;i++ )
-            {
-                packet temp = (packet)this.packets[i];
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["AcknowledgmentNumber(确认序号)"] == answer)
-                {
-                    long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
-                    if (temp.tcp_info.ContainsKey("TCP segment data") && !text.ContainsKey(seq))
-                    {
-                        text.Add(seq, temp.tcp_info["TCP segment data"]);
-                        text_seq.Add(seq);
-                    }
-                    else if (temp.application_info.ContainsKey("Data") && !text.ContainsKey(seq))
-                    {
-                        text.Add(seq, temp.application_info["Data"]);
-                        text_seq.Add(seq);
-                    }
-                }
-            }
-            text_seq.Sort();
-            foreach (long i in text_seq)
-            {
-                this.restruct_display.Text += text[i];
-            }
-            // 保存文件名
-            string fileName = this.restruct_get.Rows[e.RowIndex].Cells[2].Value.ToString().Split(' ')[1];
-            this.restruct_display.Tag = fileName.Substring(fileName.LastIndexOf("/") + 1);
+            Files file = (Files)this.files[e.RowIndex];
+            this.restruct_display.Text = file.file_name;
         }
 
         private void restruct_save_Click(object sender, EventArgs e)

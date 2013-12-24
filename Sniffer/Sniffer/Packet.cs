@@ -30,6 +30,7 @@ namespace Sniffer
         public Dictionary<string, string> udp_info;
 
         public Dictionary<string, string> application_info;
+        public byte[] application_byte;
 
         public packet(SharpPcap.RawCapture pPacket)
         {
