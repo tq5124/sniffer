@@ -396,22 +396,27 @@ namespace Sniffer
             this.info = "Source port: " + udp_info["SourcePort(源端口)"] + "  Destination port: " + udp_info["DestinationPort(目的端口)"];
 
             //判断具体应用层
-            //DNS待完成
+            //DNS待完成数据部分
             if (udp_info["SourcePort(源端口)"] == "53" || udp_info["DestinationPort(目的端口)"] == "53")
             {
                 dns_analysis(udpPacket.PayloadData);
             }
+            //LLMNR待完成
+            else if (udp_info["SourcePort(源端口)"] == "5355" || udp_info["DestinationPort(目的端口)"] == "5355")
+            {
+                dns_analysis(udpPacket.PayloadData, 5355);
+            }
         }
         /// <summary>
-        /// DNS解析
+        /// DNS及LLMNR解析
         /// </summary>
-        public void dns_analysis(byte[] dns_byte_data)
+        public void dns_analysis(byte[] dns_byte_data, int port = 53)
         {
             var dnsdata = dns_byte_data;
-            this.protocol = "DNS";
+            this.protocol = (port == 5355 ? "LLMNR" : "DNS");
             this.color = "SkyBlue";
 
-            this.application_info.Add("ApplicationType", "DNS");
+            this.application_info.Add("ApplicationType", (port == 5355 ? "LLMNR" : "DNS"));
             this.application_info.Add("Transaction ID", "0x" + Convert.ToString(dnsdata[0], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(dnsdata[1], 16).ToUpper().PadLeft(2, '0'));
             this.application_info.Add("QR", ((dnsdata[2] & 128) >> 7).ToString());
             this.application_info.Add("opcode", ((dnsdata[2] & 120) >> 3).ToString());
