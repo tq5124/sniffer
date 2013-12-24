@@ -740,10 +740,6 @@ namespace Sniffer
                         text_seq.Add(seq);
                     }
                 }
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == answer)
-                {
-                    break;
-                }
             }
             text_seq.Sort();
             foreach (long i in text_seq)
