@@ -400,26 +400,46 @@ namespace Sniffer
             //DNS待完成数据部分
             if (udp_info["SourcePort(源端口)"] == "53" || udp_info["DestinationPort(目的端口)"] == "53")
             {
-                dns_analysis(udpPacket.PayloadData);
+                DNS dnsPacket = new DNS(udpPacket.PayloadData, "DNS");
+                this.application_info = dnsPacket.application_info;
+                this.info = dnsPacket.info;
+                this.protocol = "DNS";
+                this.color = "SkyBlue";
             }
             //LLMNR待完成数据部分
             else if (udp_info["SourcePort(源端口)"] == "5355" || udp_info["DestinationPort(目的端口)"] == "5355")
             {
-                dns_analysis(udpPacket.PayloadData, "LLMNR");
+                DNS llmnrPacket = new DNS(udpPacket.PayloadData, "LLMNR");
+                this.application_info = llmnrPacket.application_info;
+                this.info = llmnrPacket.info;
+                this.protocol = "LLMNR";
+                this.color = "SkyBlue";
             }
             //NBNS待完成数据部分
             else if (udp_info["SourcePort(源端口)"] == "137" && udp_info["DestinationPort(目的端口)"] == "137")
             {
-                dns_analysis(udpPacket.PayloadData, "NBNS");
+                DNS nbnsPacket = new DNS(udpPacket.PayloadData, "NBNS");
+                this.application_info = nbnsPacket.application_info;
+                this.info = nbnsPacket.info;
+                this.protocol = "NBNS";
                 this.color = "Yellow";
             }
+            //MDNS待完成数据部分,Additional records存在问题
+            else if (((ip_info["Version(版本)"] == "IPV4" && ip_info["Destination(目的地址)"] == "224.0.0.251") || (ip_info["Version(版本)"] == "IPV6" && ip_info["Destination Address(目的地址)"].ToUpper() == "FF02::FB")) && udp_info["SourcePort(源端口)"] == "5353" && udp_info["DestinationPort(目的端口)"] == "5353")
+            {
+                DNS mdnsPacket = new DNS(udpPacket.PayloadData, "MDNS");
+                this.application_info = mdnsPacket.application_info;
+                this.info = mdnsPacket.info;
+                this.protocol = "MDNS";
+                this.color = "SkyBlue";
+            }           
             //SSDP协议
             else if (udp_info["DestinationPort(目的端口)"] == "1900")
             {
                 this.color = "YellowGreen";
                 this.protocol = "SSDP";
                 this.application_info.Add("ApplicationType", "SSDP");
-                
+
                 string ssdptext = System.Text.Encoding.Default.GetString(udpPacket.PayloadData);
                 string[] ssdpdata = ssdptext.Split(new char[2] { '\r', '\n' });
                 foreach (string i in ssdpdata)
@@ -427,7 +447,7 @@ namespace Sniffer
                     if (i != "")
                     {
                         if (i.IndexOf(':') > 0)
-                        {                            
+                        {
                             this.application_info.Add(i.Substring(0, i.IndexOf(':')), i.Substring(i.IndexOf(':') + 1, i.Length - i.IndexOf(':') - 1));
                         }
                         else
@@ -436,228 +456,19 @@ namespace Sniffer
                             this.application_info.Add("Request", i);
                         }
                     }
-                }                
+                }
+            }
+            //DB-LSP-DISC协议
+            else if (udp_info["SourcePort(源端口)"] == "17500" && udp_info["DestinationPort(目的端口)"] == "17500")
+            {
+                this.color = "SkyBlue";
+                this.protocol = "DB-LSP-DISC";
+                this.application_info.Add("ApplicationType", "DB-LSP-DISC");
+                this.info = "Dropbox LAN sync Discovery Procotol";
+
+                string dldtext = System.Text.Encoding.Default.GetString(udpPacket.PayloadData);
+                this.application_info.Add("TEXT", dldtext);
             }
         }
-        /// <summary>
-        /// DNS及LLMNR解析
-        /// </summary>
-        public void dns_analysis(byte[] dns_byte_data, string detail_protocol = "DNS")
-        {
-            var dnsdata = dns_byte_data;
-            this.protocol = detail_protocol;
-            this.color = "SkyBlue";
-
-            this.application_info.Add("ApplicationType", detail_protocol);
-            this.application_info.Add("Transaction ID", "0x" + Convert.ToString(dnsdata[0], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(dnsdata[1], 16).ToUpper().PadLeft(2, '0'));
-            this.application_info.Add("QR", ((dnsdata[2] & 128) >> 7).ToString());
-            this.application_info.Add("opcode", ((dnsdata[2] & 120) >> 3).ToString());
-            this.application_info.Add("AA", ((dnsdata[2] & 4) >> 2).ToString());
-            this.application_info.Add("TC", ((dnsdata[2] & 2) >> 1).ToString());
-            this.application_info.Add("RD", (dnsdata[2] & 1).ToString());
-            this.application_info.Add("RA", ((dnsdata[3] & 128) >> 7).ToString());
-            this.application_info.Add("zero", ((dnsdata[3] & 112) >> 4).ToString());
-            this.application_info.Add("rcode", (dnsdata[3] & 15).ToString());
-            this.application_info.Add("Questions", ((dnsdata[4] << 8) + dnsdata[5]).ToString());
-            this.application_info.Add("Answer RRs", ((dnsdata[6] << 8) + dnsdata[7]).ToString());
-            this.application_info.Add("Authority RRs", ((dnsdata[8] << 8) + dnsdata[9]).ToString());
-            this.application_info.Add("Additional RRs", ((dnsdata[10] << 8) + dnsdata[11]).ToString());
-
-            if (dnsdata.Length > 12)
-            {
-                int offset = 12;
-                int labelLen;
-                string Queries_result = "";
-                string Answers_result = "";
-                string Authoritative_result = "";
-                string Additional_result = "";
-                for (int i = 0; i < int.Parse(this.application_info["Questions"]); i++)
-                {
-                    //查询名
-                    string name = GetLabelName(dnsdata, offset, out labelLen);
-                    offset += labelLen;
-                    //查询类型
-                    offset++;
-                    string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //查询类                                            
-                    offset++;
-                    string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    offset++;
-                    Queries_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n";
-                }
-                if (Queries_result.Length > 0)
-                {
-                    this.application_info.Add("Queries", Queries_result);
-                }
-                for (int i = 0; i < int.Parse(this.application_info["Answer RRs"]); i++)
-                {
-                    //域名
-                    string name = GetLabelName(dnsdata, offset, out labelLen);
-                    offset += labelLen;
-                    //类型
-                    offset++;
-                    string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //类                                            
-                    offset++;
-                    string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //生存时间
-                    offset++;
-                    string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //资源数据长度
-                    offset++;
-                    string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    offset++;
-                    //数据解析，待完成
-                    string data = "";
-                    for (int j = 0; j < int.Parse(Length); j++)
-                    {
-                        data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
-                    }
-                    Answers_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
-                    offset += int.Parse(Length);
-                }
-                if (Answers_result.Length > 0)
-                {
-                    this.application_info.Add("Answers", Answers_result);
-                }
-                for (int i = 0; i < int.Parse(this.application_info["Authority RRs"]); i++)
-                {
-                    //域名
-                    string name = GetLabelName(dnsdata, offset, out labelLen);
-                    offset += labelLen;
-                    //类型
-                    offset++;
-                    string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //类                                            
-                    offset++;
-                    string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //生存时间
-                    offset++;
-                    string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //资源数据长度
-                    offset++;
-                    string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    offset++;
-                    //数据解析，待完成
-                    string data = "";
-                    for (int j = 0; j < int.Parse(Length); j++)
-                    {
-                        data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
-                    }
-                    Authoritative_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
-                    offset += int.Parse(Length);
-                }
-                if (Authoritative_result.Length > 0)
-                {
-                    this.application_info.Add("Authoritative nameservers", Authoritative_result);
-                }
-                for (int i = 0; i < int.Parse(this.application_info["Additional RRs"]); i++)
-                {
-                    //域名
-                    string name = GetLabelName(dnsdata, offset, out labelLen);
-                    offset += labelLen;
-                    //类型
-                    offset++;
-                    string Type = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //类                                            
-                    offset++;
-                    string Class = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //生存时间
-                    offset++;
-                    string TTL = ((dnsdata[offset++] << 24) + (dnsdata[offset++] << 16) + (dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    //资源数据长度
-                    offset++;
-                    string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
-                    offset++;
-                    //数据解析，待完成
-                    string data = "";
-                    for (int j = 0; j < int.Parse(Length); j++)
-                    {
-                        data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
-                    }
-                    Additional_result += "Name: " + name + "\r\n" + "Type: " + Type + "\r\n" + "Class: " + Class + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
-                    offset += int.Parse(Length);
-                }
-                if (Additional_result.Length > 0)
-                {
-                    this.application_info.Add("Additional records", Additional_result);
-                }
-            }
-
-            if (this.application_info["opcode"] == "0")
-            {
-                if (detail_protocol == "DNS" || detail_protocol == "LLMNR")
-                {
-                    this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"];
-                }
-                else if (detail_protocol == "NBNS")
-                {
-                    this.info = "Name query";
-                }
-                else
-                {
-                    this.info = "to be continued";
-                }
-            }
-            else if (this.application_info["opcode"] == "5")
-            {
-                if (detail_protocol == "DNS" || detail_protocol == "LLMNR")
-                {
-                    this.info = "to be continued";
-                }
-                else if (detail_protocol == "NBNS")
-                {
-                    this.info = "Registration";
-                }
-                else
-                {
-                    this.info = "to be continued";
-                }
-            }
-            else
-            {
-                this.info = "DNS to be continued";
-            }
-        }
-
-        /// <summary>
-        /// DNS域名解析
-        /// </summary>
-        public static string GetLabelName(byte[] data, int offset, out int labelLen)
-        {
-            bool alreadyJump = false;
-            int seek = offset;
-            int len = data[seek];
-            labelLen = 0;
-            StringBuilder result = new StringBuilder(63);
-            while (len > 0 && seek < data.Length)
-            {
-                if (len > 191 && len < 255)
-                {
-                    if (alreadyJump)
-                    {
-                        labelLen = seek - offset;
-                        return result.ToString();
-                    }
-                    int tempLen;
-                    result.Append(GetLabelName(data, data[++seek] + (len - 192) * 256, out tempLen));
-                    alreadyJump = true;
-                    labelLen = seek - offset;
-                    return result.ToString();
-                }
-                else if (len < 64)
-                {
-                    for (; len > 0; len--)
-                    {
-                        result.Append((char)data[++seek]);
-                    }
-                    len = data[++seek];
-                    if (len > 0) result.Append(".");
-                }
-            }
-            labelLen = seek - offset;
-            return result.ToString();
-        }
-
     }
 }

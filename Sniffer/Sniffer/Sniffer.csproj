@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Files.cs" />
+    <Compile Include="DNS.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
