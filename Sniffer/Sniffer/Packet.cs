@@ -401,22 +401,28 @@ namespace Sniffer
             {
                 dns_analysis(udpPacket.PayloadData);
             }
-            //LLMNR待完成
+            //LLMNR待完成数据部分
             else if (udp_info["SourcePort(源端口)"] == "5355" || udp_info["DestinationPort(目的端口)"] == "5355")
             {
-                dns_analysis(udpPacket.PayloadData, 5355);
+                dns_analysis(udpPacket.PayloadData, "LLMNR");
+            }
+            //NBNS待完成数据部分
+            else if (udp_info["SourcePort(源端口)"] == "137" && udp_info["DestinationPort(目的端口)"] == "137")
+            {
+                dns_analysis(udpPacket.PayloadData, "NBNS");
+                this.color = "Yellow";
             }
         }
         /// <summary>
         /// DNS及LLMNR解析
         /// </summary>
-        public void dns_analysis(byte[] dns_byte_data, int port = 53)
+        public void dns_analysis(byte[] dns_byte_data, string detail_protocol = "DNS")
         {
             var dnsdata = dns_byte_data;
-            this.protocol = (port == 5355 ? "LLMNR" : "DNS");
+            this.protocol = detail_protocol;
             this.color = "SkyBlue";
 
-            this.application_info.Add("ApplicationType", (port == 5355 ? "LLMNR" : "DNS"));
+            this.application_info.Add("ApplicationType", detail_protocol);
             this.application_info.Add("Transaction ID", "0x" + Convert.ToString(dnsdata[0], 16).ToUpper().PadLeft(2, '0') + Convert.ToString(dnsdata[1], 16).ToUpper().PadLeft(2, '0'));
             this.application_info.Add("QR", ((dnsdata[2] & 128) >> 7).ToString());
             this.application_info.Add("opcode", ((dnsdata[2] & 120) >> 3).ToString());
@@ -554,7 +560,33 @@ namespace Sniffer
 
             if (this.application_info["opcode"] == "0")
             {
-                this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"];
+                if (detail_protocol == "DNS" || detail_protocol == "LLMNR")
+                {
+                    this.info = "Standard query " + (this.application_info["QR"] == "1" ? "response " : "") + this.application_info["Transaction ID"];
+                }
+                else if (detail_protocol == "NBNS")
+                {
+                    this.info = "Name query";
+                }
+                else
+                {
+                    this.info = "to be continued";
+                }
+            }
+            else if (this.application_info["opcode"] == "5")
+            {
+                if (detail_protocol == "DNS" || detail_protocol == "LLMNR")
+                {
+                    this.info = "to be continued";
+                }
+                else if (detail_protocol == "NBNS")
+                {
+                    this.info = "Registration";
+                }
+                else
+                {
+                    this.info = "to be continued";
+                }
             }
             else
             {
