@@ -77,13 +77,9 @@ namespace Sniffer
                     offset++;
                     string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
                     offset++;
-                    //数据解析，待完成
-                    string data = "";
-                    for (int j = 0; j < int.Parse(Length); j++)
-                    {
-                        data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
-                    }
-                    Answers_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                    //数据解析
+                    string data = data_analysis(dnsdata, offset, int.Parse(Length), type_analysis(Type));
+                    Answers_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + type_analysis(Type) + ": " + data + "\r\n\r\n";
                     offset += int.Parse(Length);
                 }
                 if (Answers_result.Length > 0)
@@ -108,13 +104,9 @@ namespace Sniffer
                     offset++;
                     string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
                     offset++;
-                    //数据解析，待完成
-                    string data = "";
-                    for (int j = 0; j < int.Parse(Length); j++)
-                    {
-                        data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
-                    }
-                    Authoritative_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                    //数据解析
+                    string data = data_analysis(dnsdata, offset, int.Parse(Length), type_analysis(Type));
+                    Authoritative_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + type_analysis(Type) + ": " + data + "\r\n\r\n";
                     offset += int.Parse(Length);
                 }
                 if (Authoritative_result.Length > 0)
@@ -139,13 +131,9 @@ namespace Sniffer
                     offset++;
                     string Length = ((dnsdata[offset++] << 8) + dnsdata[offset]).ToString();
                     offset++;
-                    //数据解析，待完成
-                    string data = "";
-                    for (int j = 0; j < int.Parse(Length); j++)
-                    {
-                        data += Convert.ToString(dnsdata[j + offset], 16).ToUpper().PadLeft(2, '0');
-                    }
-                    Additional_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + "Data: " + data + "\r\n\r\n";
+                    //数据解析
+                    string data = data_analysis(dnsdata, offset, int.Parse(Length), type_analysis(Type));
+                    Additional_result += "Name: " + name + "\r\n" + "Type: " + type_analysis(Type) + "\r\n" + "Class: " + class_analysis(Class) + "\r\n" + "TTL: " + TTL + "\r\n" + "Data Length: " + Length + "\r\n" + type_analysis(Type) + ": " + data + "\r\n\r\n";
                     offset += int.Parse(Length);
                 }
                 if (Additional_result.Length > 0)
@@ -302,6 +290,62 @@ namespace Sniffer
                     return "HESIOD";
                 case "255":
                     return "ANY";
+                default:
+                    return "UNKOWN";
+            }
+        }
+        /// <summary>
+        /// 数据解析
+        /// </summary>
+        public string data_analysis(byte[] data, int offset, int dataLength, string type)
+        {
+            int labelLen;
+            string NameServer = "";
+            string Mail = "";
+            switch (type)
+            {
+                case "A":
+                    string address = "";
+                    for (int i = 0; i < 4; i++)
+                        {
+                            address += data[offset++].ToString() + ".";
+                        }
+                    address = address.TrimEnd('.');
+                    return address;
+                case "CNAME":
+                    string name = "";                    
+                    name += GetLabelName(data, offset, out  labelLen);
+                    return name;
+                case "MX":
+                    int Preference;                    
+                    Preference = data[offset++] << 8 + data[offset++];                    
+                    Mail = GetLabelName(data, offset, out  labelLen);
+                    return "Preference = " + Preference + " | Mail = " + Mail;
+                case "NS":                    
+                    NameServer += GetLabelName(data, offset, out  labelLen);
+                    return NameServer;
+                case "SOA":
+                    int endOffset = offset + dataLength;
+                    NameServer = GetLabelName(data, offset, out labelLen);
+                    offset += labelLen;
+                    Mail = GetLabelName(data, ++offset, out labelLen);
+                    offset += labelLen;
+                    offset++;
+                    int Serial = data[offset++] << 24 + data[offset++] << 16 + data[offset++] << 8 + data[offset++];
+                    int Refresh = data[offset++] << 24 + data[offset++] << 16 + data[offset++] << 8 + data[offset++];
+                    int Retry = data[offset++] << 24 + data[offset++] << 16 + data[offset++] << 8 + data[offset++];
+                    int Expire = data[offset++] << 24 + data[offset++] << 16 + data[offset++] << 8 + data[offset++];
+                    int TTL = data[offset++] << 24 + data[offset++] << 16 + data[offset++] << 8 + data[offset++];
+                    return "nameServer = " + NameServer + " | mail = " + Mail + " | serial = " + Serial.ToString() + " | refresh = " + Refresh.ToString() + " | ...";
+                case "TXT":
+                    //由于txt的字段有可能大于63，超出一般GetLabelName的字符串长度。
+                    int len = dataLength;
+                    StringBuilder build = new StringBuilder(len);
+                    for (; len > 0; len--)
+                    {
+                        build.Append((char)data[offset++]);
+                    }
+                    return build.ToString();
                 default:
                     return "UNKOWN";
             }
