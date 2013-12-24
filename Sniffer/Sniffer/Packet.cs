@@ -412,6 +412,31 @@ namespace Sniffer
                 dns_analysis(udpPacket.PayloadData, "NBNS");
                 this.color = "Yellow";
             }
+            //SSDP协议
+            else if (udp_info["DestinationPort(目的端口)"] == "1900")
+            {
+                this.color = "YellowGreen";
+                this.protocol = "SSDP";
+                this.application_info.Add("ApplicationType", "SSDP");
+                
+                string ssdptext = System.Text.Encoding.Default.GetString(udpPacket.PayloadData);
+                string[] ssdpdata = ssdptext.Split(new char[2] { '\r', '\n' });
+                foreach (string i in ssdpdata)
+                {
+                    if (i != "")
+                    {
+                        if (i.IndexOf(':') > 0)
+                        {                            
+                            this.application_info.Add(i.Substring(0, i.IndexOf(':')), i.Substring(i.IndexOf(':') + 1, i.Length - i.IndexOf(':') - 1));
+                        }
+                        else
+                        {
+                            this.info = i;
+                            this.application_info.Add("Request", i);
+                        }
+                    }
+                }                
+            }
         }
         /// <summary>
         /// DNS及LLMNR解析
