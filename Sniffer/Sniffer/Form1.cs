@@ -638,10 +638,11 @@ namespace Sniffer
 
                     SharpPcap.RawCapture pPacket;
 
-                    try
+
+                    // Go through all packets in the file
+                    while ((pPacket = captureFileReader.GetNextPacket()) != null)
                     {
-                        // Go through all packets in the file
-                        while ((pPacket = captureFileReader.GetNextPacket()) != null)
+                        try
                         {
                             packet temp = new packet(pPacket);
                             this.packets.Add(temp);
@@ -664,13 +665,13 @@ namespace Sniffer
                                 this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
                             }
                         }
-                        this.is_saved = true;
-                        MessageBox.Show("读取完毕");
+                        catch (Exception)
+                        {
+                            ;
+                        }                        
                     }
-                    catch (Exception er)
-                    {
-                        MessageBox.Show(er.Message);
-                    }
+                    this.is_saved = true;
+                    MessageBox.Show("读取完毕");
                 }
             }
         }
