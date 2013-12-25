@@ -128,7 +128,7 @@ namespace Sniffer
                                 this.icmp_info.Add("Sequence(序列号)", icmpPacket.Sequence.ToString());
 
                                 //颜色
-                                this.color = "Pink";
+                                this.color = "AntiqueWhite";
                                 //简易信息
                                 this.info = icmp_info["TypeCode(类型)"] + " id=" + icmp_info["Identifier(标识符)"] + ", seq=" + icmp_info["Sequence(序列号)"] + ", ttl=" + ip_info["Time to live(生存期)"];
                             }
@@ -208,7 +208,7 @@ namespace Sniffer
                                 this.icmp_info.Add("Checksum(校验和)", icmpPacket.Checksum.ToString());
 
                                 //颜色
-                                this.color = "Pink";                                
+                                this.color = "AntiqueWhite";                                
                             }
 
                             //IGMP包解析,待完成
@@ -249,7 +249,7 @@ namespace Sniffer
                     this.arp_info.Add("TargetProtocolAddress(目标IP地址)", arpPacket.TargetProtocolAddress.ToString());
 
                     //颜色
-                    this.color = "Orange";
+                    this.color = "BlanchedAlmond";
                     //简易信息
                     this.srcIp = arpPacket.SenderProtocolAddress.ToString();
                     this.destIp = arpPacket.TargetProtocolAddress.ToString();
@@ -283,7 +283,7 @@ namespace Sniffer
             this.tcp_info.Add("Option(可选部分)", "to be continued");
 
             //颜色
-            this.color = "YellowGreen";
+            this.color = "PaleGreen";
             if (this.tcp_info["Checksum(校验和)"] != this.tcp_info["tcpPacket计算校验和函数计算结果"])
             {
                 this.color = "Red";
@@ -296,7 +296,7 @@ namespace Sniffer
             if (tcp_info["SourcePort(源端口)"] == "23")
             {
                 this.protocol = "TELNET";
-                this.color = "Blue";
+                this.color = "LightSteelBlue";
                 this.info = "Telnet Data ...";
 
                 this.application_info.Add("ApplicationType", "TELNET");
@@ -325,10 +325,29 @@ namespace Sniffer
                 }
                 this.application_info.Add("Data", m_strLine);
             }
-            //HTTP，待完善，存在很多空包及乱码问题
+            //HTTP，待完善
             else if (tcp_info["SourcePort(源端口)"] == "80" || tcp_info["DestinationPort(目的端口)"] == "80")
             {
                 http_analysis(tcpPacket.PayloadData);
+            }
+            //FTP，待完善
+            else if ((tcp_info["SourcePort(源端口)"] == "21" || tcp_info["DestinationPort(目的端口)"] == "21") && tcpPacket.PayloadData.Length > 0)
+            {
+                this.protocol = "FTP";
+                this.color = "LightSteelBlue";                
+                this.application_info.Add("ApplicationType", "FTP");
+
+                string ftptext = System.Text.Encoding.Default.GetString(tcpPacket.PayloadData);
+                if (tcp_info["SourcePort(源端口)"] == "21")
+                {
+                    this.application_info.Add("Response", ftptext);
+                    this.info = "Response: " + ftptext.Substring(0,ftptext.IndexOf("\r\n"));
+                }
+                else
+                {
+                    this.application_info.Add("Request", ftptext);
+                    this.info = "Request: " + ftptext.Substring(0, ftptext.IndexOf("\r\n"));
+                }
             }
         }
         /// <summary>
@@ -372,7 +391,7 @@ namespace Sniffer
             if (headertext.IndexOf("HTTP") == 0 || headertext.IndexOf("GET") == 0 || headertext.IndexOf("POST") == 0)
             {
                 this.protocol = "HTTP";
-                this.color = "YellowGreen";
+                this.color = "PaleGreen";
                 this.info = headertext.Substring(0, headertext.IndexOf("\r\n"));
 
                 this.application_info.Add("ApplicationType", "HTTP");
@@ -443,7 +462,7 @@ namespace Sniffer
             //SSDP协议
             else if (udp_info["DestinationPort(目的端口)"] == "1900")
             {
-                this.color = "YellowGreen";
+                this.color = "PaleGreen";
                 this.protocol = "SSDP";
                 this.application_info.Add("ApplicationType", "SSDP");
 
