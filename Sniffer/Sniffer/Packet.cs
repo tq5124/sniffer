@@ -58,6 +58,7 @@ namespace Sniffer
             this.udp_info = new Dictionary<string, string>();
 
             this.application_info = new Dictionary<string, string>();
+            this.application_byte = null;
 
             analysis_packet();
         }
@@ -373,11 +374,18 @@ namespace Sniffer
                 this.application_info.Add("Data", datatext);
                 this.application_info.Add("All", System.Text.Encoding.Default.GetString(httpData));
                 this.application_info.Add("Byte", bytetext);
+                if (datatext != "")
+                {
+                    this.application_byte = new byte[datatext.Length / 2];
+                    Array.Copy(httpData, (bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length) / 2, this.application_byte, 0, this.application_byte.Length);
+                }
             }
             else if (datatext.Length > 0)
             {
                 this.info = "TCP segment of a reassembled PDU";
                 this.tcp_info.Add("TCP segment data", datatext);
+                this.application_byte = new byte[datatext.Length / 2];
+                Array.Copy(httpData, (bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length) / 2, this.application_byte, 0, this.application_byte.Length);
             }
         }
         /// <summary>
