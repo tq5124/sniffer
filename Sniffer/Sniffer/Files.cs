@@ -83,7 +83,7 @@ namespace Sniffer
                         text.Add(seq, temp.application_byte);
                         text_seq.Add(seq);
                     }
-                    else if (temp.application_info.ContainsKey("Data") && !text.ContainsKey(seq))
+                    else if (temp.application_info.ContainsKey("Data") && temp.application_info["Data"] != "" && !text.ContainsKey(seq))
                     {
                         text.Add(seq, temp.application_byte);
                         text_seq.Add(seq);
@@ -125,8 +125,15 @@ namespace Sniffer
 
         private byte[] gzip_decoding(byte[] data)
         {
-            byte[] szSource = new byte[data.Length - 5];
-            Array.Copy(data, 5, szSource, 0, szSource.Length);
+            int head_num=0;
+            while (true)
+            {
+                if (data[head_num] == 0x1f && data[head_num + 1] == 0x8b)
+                    break;
+                head_num++;
+            }
+            byte[] szSource = new byte[data.Length - head_num];
+            Array.Copy(data, head_num, szSource, 0, szSource.Length);
             MemoryStream msSource = new MemoryStream(szSource);
             //DeflateStream  也可以这儿
             GZipStream stream = new GZipStream(msSource, CompressionMode.Decompress);
