@@ -45,8 +45,17 @@ namespace Sniffer
                     return;
                 }
             }
+            try
+            {
+                this.device.StopCapture();
+            }
+            catch
+            {
+                ;
+            }
             //设置保存标志位
             this.is_saved = false;
+            this.button1.Enabled = false;
             //清除之前的数据
             this.packets = new ArrayList();
             this.files = new ArrayList();
@@ -109,6 +118,7 @@ namespace Sniffer
         /// </summary>
         private void threadHandler()
         {
+            this.device.Close();
             this.device.Open(DeviceMode.Promiscuous, this.readTimeoutMilliseconds);
             this.device.Filter = this.filter;
             //this.device. = CaptureMode.Packets; //抓数据包
@@ -186,6 +196,7 @@ namespace Sniffer
             {
                 ;
             }
+            this.button1.Enabled = true;
         }
 
         private void dataGridView_row_click(object sender, EventArgs e)
