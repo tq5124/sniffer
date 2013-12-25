@@ -32,6 +32,8 @@ namespace Sniffer
         public Dictionary<string, string> application_info;
         public byte[] application_byte;
 
+        public static int ftp_pasv_port = -1;
+
         public packet(SharpPcap.RawCapture pPacket)
         {
             var timestamp = pPacket.Timeval.Date;
@@ -342,12 +344,42 @@ namespace Sniffer
                 {
                     this.application_info.Add("Response", ftptext);
                     this.info = "Response: " + ftptext.Substring(0,ftptext.IndexOf("\r\n"));
+                    //获取被动模式端口号
+                    if (ftptext.IndexOf("Entering Passive Mode") >= 0)
+                    {
+                        string temp_ftp_pasv_port = ftptext.Substring(ftptext.IndexOf('(') + 1, ftptext.IndexOf(')') - ftptext.IndexOf('(') - 1);
+                        string[] temp = temp_ftp_pasv_port.Split(',');
+                        ftp_pasv_port = (int.Parse(temp[temp.Length - 2]) << 8) + int.Parse(temp[temp.Length - 1]);
+                    }
+                    //传输结束标识
+                    else if (ftptext.IndexOf("226") >= 0)
+                    {
+                        ftp_pasv_port = -1;
+                    }
                 }
                 else
                 {
                     this.application_info.Add("Request", ftptext);
                     this.info = "Request: " + ftptext.Substring(0, ftptext.IndexOf("\r\n"));
                 }
+            }
+            //FTP-DATA，待完善
+            else if ((tcp_info["SourcePort(源端口)"] == ftp_pasv_port.ToString() || tcp_info["SourcePort(源端口)"] == "20") && tcpPacket.PayloadData.Length > 0)
+            {
+                this.protocol = "FTP-DATA";
+                this.color = "LightSteelBlue";
+                this.application_info.Add("ApplicationType", "FTP-DATA");
+
+                string ftpdatatext = "";
+                foreach (byte i in tcpPacket.PayloadData)
+                {
+                    ftpdatatext += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
+                }
+                this.application_info.Add("Data", ftpdatatext);
+                this.application_byte = new byte[tcpPacket.PayloadData.Length];
+                Array.Copy(tcpPacket.PayloadData, 0, this.application_byte, 0, this.application_byte.Length);
+
+                this.info = "FTP DATA: " + tcpPacket.PayloadData.Length.ToString() + " bytes";
             }
         }
         /// <summary>
