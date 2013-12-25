@@ -361,6 +361,12 @@ namespace Sniffer
             {
                 datatext = bytetext;
             }
+            //以byte数组保存数据
+            if (datatext != "")
+            {
+                this.application_byte = new byte[datatext.Length / 2];
+                Array.Copy(httpData, bytetext.IndexOf(datatext) / 2, this.application_byte, 0, this.application_byte.Length);
+            }
 
             //判断HTTP解析是否成功，成功则添加HTTP信息，否则则判断为TCP传送数据
             if (headertext.IndexOf("HTTP") == 0 || headertext.IndexOf("GET") == 0 || headertext.IndexOf("POST") == 0)
@@ -373,19 +379,12 @@ namespace Sniffer
                 this.application_info.Add("Head", headertext);
                 this.application_info.Add("Data", datatext);
                 this.application_info.Add("All", System.Text.Encoding.Default.GetString(httpData));
-                this.application_info.Add("Byte", bytetext);
-                if (datatext != "")
-                {
-                    this.application_byte = new byte[datatext.Length / 2];
-                    Array.Copy(httpData, (bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length) / 2, this.application_byte, 0, this.application_byte.Length);
-                }
+                this.application_info.Add("Byte", bytetext);                
             }
             else if (datatext.Length > 0)
             {
                 this.info = "TCP segment of a reassembled PDU";
                 this.tcp_info.Add("TCP segment data", datatext);
-                this.application_byte = new byte[datatext.Length / 2];
-                Array.Copy(httpData, (bytetext.IndexOf("0D0A0D0A") + "0D0A0D0A".Length) / 2, this.application_byte, 0, this.application_byte.Length);
             }
         }
         /// <summary>
