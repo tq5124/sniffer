@@ -448,7 +448,8 @@
             this.display_text.Location = new System.Drawing.Point(6, 33);
             this.display_text.Multiline = true;
             this.display_text.Name = "display_text";
-            this.display_text.Size = new System.Drawing.Size(352, 214);
+            this.display_text.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.display_text.Size = new System.Drawing.Size(352, 368);
             this.display_text.TabIndex = 1;
             // 
             // display_title

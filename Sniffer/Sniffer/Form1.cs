@@ -190,9 +190,15 @@ namespace Sniffer
 
         private void dataGridView_row_click(object sender, EventArgs e)
         {
-            if (this.dataGridView1.SelectedRows == null)
+            int index = -1;
+            try
+            {
+                index = int.Parse(this.dataGridView1.CurrentRow.Cells[5].Value.ToString());
+            }
+            catch
+            {
                 return;
-            int index = int.Parse(this.dataGridView1.CurrentRow.Cells[5].Value.ToString());
+            }
             packet Packet = (packet)this.packets[index];
 
             // 保存tree中的选中节点信息
@@ -688,18 +694,26 @@ namespace Sniffer
         {
             this.restruct_get.Rows.Clear();
             this.files = new ArrayList();
-            for (int index = 0; index < this.packets.Count; index++)
+            try
             {
-                packet Packet = (packet)this.packets[index];
-                if (Packet.info.IndexOf("GET") == 0)
+                for (int index = 0; index < this.packets.Count; index++)
                 {
-                    int i= this.restruct_get.Rows.Add();
-                    this.restruct_get.Rows[i].Cells[0].Value = index;
-                    this.restruct_get.Rows[i].Cells[1].Value = Packet.tcp_info["SourcePort(源端口)"];
-                    this.restruct_get.Rows[i].Cells[2].Value = Packet.info;
-                    this.files.Add(new Files());
+                    packet Packet = (packet)this.packets[index];
+                    if (Packet.info.IndexOf("GET") == 0)
+                    {
+                        int i = this.restruct_get.Rows.Add();
+                        this.restruct_get.Rows[i].Cells[0].Value = index;
+                        this.restruct_get.Rows[i].Cells[1].Value = Packet.tcp_info["SourcePort(源端口)"];
+                        this.restruct_get.Rows[i].Cells[2].Value = Packet.info;
+                        this.files.Add(new Files());
+                    }
                 }
             }
+            catch
+            {
+                return;
+            }
+            
             
         }
 
@@ -758,8 +772,15 @@ namespace Sniffer
 
         private void treeView1_DoubleClick(object sender, EventArgs e)
         {
-            this.tab_multi.SelectedIndex = 2;
-            this.display_text.Text = this.treeView1.SelectedNode.Text.Substring(this.treeView1.SelectedNode.Text.IndexOf(" : ")+3);
+            try
+            {
+                this.display_text.Text = this.treeView1.SelectedNode.Text.Substring(this.treeView1.SelectedNode.Text.IndexOf(" : ") + 3);
+                this.tab_multi.SelectedIndex = 2;
+            }
+            catch
+            {
+                return;
+            }
         }
     }
 }

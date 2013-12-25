@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.IO.Compression;
+using System.Text.RegularExpressions;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Sniffer
 {
@@ -14,6 +17,8 @@ namespace Sniffer
         public packet packet_header;
         public string file_name;
         public byte[] file_data;
+        public string charset;
+        public string encoding;
 
         public Files()
         {
@@ -45,6 +50,8 @@ namespace Sniffer
             }
             this.packet_request = pck;
             this.packet_header = this.find_header(packets, index, pck.tcp_info["AcknowledgmentNumber(确认序号)"]);
+            this.charset = this.find_charset();
+            this.encoding = this.find_encoding();
             this.file_data = this.find_data(packets, index, this.packet_header.tcp_info["AcknowledgmentNumber(确认序号)"]);
             this.file_name = this.find_fileName(pck);
         }
@@ -53,7 +60,7 @@ namespace Sniffer
             for (int i = index; i < packets.Count;i++ )
             {
                 packet temp = (packet)packets[i];
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == ack)
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == ack && temp.application_info.ContainsKey("Head"))
                 {
                     return temp;
                 }
@@ -89,12 +96,59 @@ namespace Sniffer
             {
                 data.Write(text[i], 0, text[i].Length);
             }
-            return data.ToArray();
+            byte[] result = data.ToArray();
+            if (this.encoding == "gzip")
+            {
+                result = this.gzip_decoding(result);
+            }
+            return result;
         }
 
         private string find_fileName(packet pkt){
             string fileName = pkt.info.Split(' ')[1];
             return fileName.Substring(fileName.LastIndexOf("/") + 1);
+        }
+
+        private string find_charset()
+        {
+            string head = this.packet_header.application_info["Head"];
+            Regex search_charset = new Regex(@"(?<=charset=)[a-z0-9-]+\b");
+            return search_charset.Match(head).Value;
+        }
+
+        private string find_encoding()
+        {
+            string head = this.packet_header.application_info["Head"];
+            Regex search_charset = new Regex(@"(?<=Content-Encoding: )[a-z0-9-]+\b");
+            return search_charset.Match(head).Value;
+        }
+
+        private byte[] gzip_decoding(byte[] data)
+        {
+            byte[] szSource = new byte[data.Length - 5];
+            Array.Copy(data, 5, szSource, 0, szSource.Length);
+            MemoryStream msSource = new MemoryStream(szSource);
+            //DeflateStream  也可以这儿
+            GZipStream stream = new GZipStream(msSource, CompressionMode.Decompress);
+            byte[] szTotal = new byte[40 * 1024];
+            long lTotal = 0;
+            byte[] buffer = new byte[8];
+            int iCount = 0;
+            do
+            {
+                iCount = stream.Read(buffer, 0, 8);
+                if (szTotal.Length <= lTotal + iCount) //放大数组
+                {
+                    byte[] temp = new byte[szTotal.Length * 10];
+                    szTotal.CopyTo(temp, 0);
+                    szTotal = temp;
+                }
+                buffer.CopyTo(szTotal, lTotal);
+                lTotal += iCount;
+            } while (iCount != 0);
+            byte[] szDest = new byte[lTotal];
+            Array.Copy(szTotal, 0, szDest, 0, lTotal);
+            return szDest;
         }
     }
 }
