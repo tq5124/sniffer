@@ -750,8 +750,19 @@ namespace Sniffer
                 int getIndex = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
                 temp.update(this.packets, getIndex);
             }
+
+            // 写入textbox
             Files file = (Files)this.files[e.RowIndex];
-            this.restruct_display.Text = System.Text.Encoding.Default.GetString(file.file_data);
+            switch (file.file_type){
+                case "jpg":
+                case "png":
+                case "gif":
+                    this.restruct_display.Text = "不支持显示图片，请保存后打开";
+                    break;
+                default:
+                    this.restruct_display.Text = System.Text.Encoding.Default.GetString(file.file_data);
+                    break;
+            }
             this.restruct_display.Tag = e.RowIndex;
         }
 
