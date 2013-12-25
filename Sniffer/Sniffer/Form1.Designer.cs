@@ -58,7 +58,6 @@
             this.filter_value = new System.Windows.Forms.TextBox();
             this.filter_key = new System.Windows.Forms.ComboBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.restruct_translate = new System.Windows.Forms.Button();
             this.restruct_save = new System.Windows.Forms.Button();
             this.restruct_display = new System.Windows.Forms.TextBox();
             this.restruct_get = new System.Windows.Forms.DataGridView();
@@ -357,7 +356,6 @@
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.restruct_translate);
             this.tabPage3.Controls.Add(this.restruct_save);
             this.tabPage3.Controls.Add(this.restruct_display);
             this.tabPage3.Controls.Add(this.restruct_get);
@@ -368,16 +366,6 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "数据报重组";
             this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // restruct_translate
-            // 
-            this.restruct_translate.Location = new System.Drawing.Point(193, 386);
-            this.restruct_translate.Name = "restruct_translate";
-            this.restruct_translate.Size = new System.Drawing.Size(75, 23);
-            this.restruct_translate.TabIndex = 6;
-            this.restruct_translate.Text = "翻译";
-            this.restruct_translate.UseVisualStyleBackColor = true;
-            this.restruct_translate.Click += new System.EventHandler(this.restruct_translate_Click);
             // 
             // restruct_save
             // 
@@ -547,7 +535,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn message;
         private System.Windows.Forms.TextBox restruct_display;
         private System.Windows.Forms.Button restruct_save;
-        private System.Windows.Forms.Button restruct_translate;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TextBox display_text;
         private System.Windows.Forms.Label display_title;

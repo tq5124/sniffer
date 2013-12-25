@@ -726,13 +726,15 @@ namespace Sniffer
                 temp.update(this.packets, getIndex);
             }
             Files file = (Files)this.files[e.RowIndex];
-            this.restruct_display.Text = file.file_name;
+            this.restruct_display.Text = System.Text.Encoding.Default.GetString(file.file_data);
+            this.restruct_display.Tag = e.RowIndex;
         }
 
         private void restruct_save_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.FileName = this.restruct_display.Tag.ToString();
+            Files temp = (Files)this.files[Convert.ToInt32(this.restruct_display.Tag)];
+            saveFileDialog.FileName = temp.file_name;
             saveFileDialog.Filter = "所有文件|*.*";
             saveFileDialog.FilterIndex = 2;
             saveFileDialog.RestoreDirectory = true;
@@ -741,7 +743,7 @@ namespace Sniffer
                 //实例化一个文件流--->与写入文件相关联
                 FileStream fs = new FileStream(saveFileDialog.FileName, FileMode.Create);
                 //获得字节数组
-                byte[] data = new UTF8Encoding().GetBytes(this.restruct_display.Text);
+                byte[] data = temp.file_data;
                 fs.Write(data, 0, data.Length);
                 fs.Flush();
                 fs.Close();
