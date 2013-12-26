@@ -87,12 +87,12 @@ namespace Sniffer
             for (int i = index; i < packets.Count;i++ )
             {
                 packet temp = (packet)packets[i];
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["AcknowledgmentNumber(确认序号)"] == ack)
+                switch (this.protocol)
                 {
-                    long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
-                    switch (this.protocol)
-                    {
-                        case "HTTP":
+                    case "HTTP":
+                        if (temp.tcp_info.Count > 0 && temp.tcp_info["AcknowledgmentNumber(确认序号)"] == ack)
+                        {
+                            long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
                             if (temp.tcp_info.ContainsKey("TCP segment data") && !text.ContainsKey(seq))
                             {
                                 text.Add(seq, temp.application_byte);
@@ -103,18 +103,16 @@ namespace Sniffer
                                 text.Add(seq, temp.application_byte);
                                 text_seq.Add(seq);
                             }
-                            break;
-                        case "FTP":
-                            if (temp.protocol == "FTP-DATA")
-                            {
-                                text.Add(seq, temp.application_byte);
-                                text_seq.Add(seq);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    
+                        }
+                        break;
+                    case "FTP":
+                        if (temp.protocol == "FTP-DATA" && temp.tcp_info["SourcePort(源端口)"] == this.packet_header.application_info["PASV_PORT"])
+                        {
+                            long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
+                            text.Add(seq, temp.application_byte);
+                            text_seq.Add(seq);
+                        }
+                        break;
                 }
             }
             text_seq.Sort();
