@@ -141,6 +141,8 @@ namespace Sniffer
                                 this.igmp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(igmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.igmp_info.Add("GroupAddress(组地址)", igmpPacket.GroupAddress.ToString());
 
+                                //颜色
+                                this.color = "BlanchedAlmond";
                                 //简易信息
                                 this.info = this.igmp_info["Type(类型)"] + " " + this.igmp_info["GroupAddress(组地址)"];
                             }

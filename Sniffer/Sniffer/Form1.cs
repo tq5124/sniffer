@@ -22,6 +22,7 @@ namespace Sniffer
             this.filter_btn_apply.Enabled = false;
             this.is_saved = true;
             this.button2.Enabled = false;
+            this.button8.Enabled = false;
         }
 
         //抓包线程
