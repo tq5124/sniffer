@@ -21,6 +21,8 @@ namespace Sniffer
             combox1_Ini();
             this.filter_btn_apply.Enabled = false;
             this.is_saved = true;
+            this.button2.Enabled = false;
+            this.button8.Enabled = false;
         }
 
         //抓包线程
@@ -38,7 +40,7 @@ namespace Sniffer
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (this.is_saved == false)
+            if (this.is_saved == false && this.packets.Count > 0)
             {
                 if (MessageBox.Show("不保存并重新抓包？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
                 {
@@ -48,6 +50,10 @@ namespace Sniffer
             //设置保存标志位
             this.is_saved = false;
             this.button1.Enabled = false;
+            this.button5.Enabled = false;
+            this.button8.Enabled = false;
+            this.comboBox1.Enabled = false;
+            this.button2.Enabled = true;
             //清除之前的数据
             this.packets = new ArrayList();
             this.files = new ArrayList();
@@ -189,6 +195,10 @@ namespace Sniffer
                 ;
             }
             this.button1.Enabled = true;
+            this.button5.Enabled = true;
+            this.button8.Enabled = true;
+            this.comboBox1.Enabled = true;
+            this.button2.Enabled = false;
         }
 
         private void dataGridView_row_click(object sender, EventArgs e)
@@ -314,7 +324,7 @@ namespace Sniffer
             // 选中之前的某个node节点
             if (selected_path != "")
             {
-                Console.Write(selected_path);
+                //Console.Write(selected_path);
                 foreach (TreeNode node in this.treeView1.Nodes)
                 {
                     TreeNode item = FindNode(node, selected_path);
@@ -338,7 +348,7 @@ namespace Sniffer
             if (tnParent == null) return null;
             string item_path = tnParent.FullPath.Substring(0, tnParent.FullPath.LastIndexOf(" :"));
             if (item_path == strValue) return tnParent;
-            Console.Write(item_path + '\n');
+            //Console.Write(item_path + '\n');
             TreeNode tnRet = null;
             foreach (TreeNode tn in tnParent.Nodes)
             {
@@ -613,12 +623,14 @@ namespace Sniffer
                 try
                 {
                     capFile = sfd.FileName;
+                    this.device.Open();
                     SharpPcap.LibPcap.CaptureFileWriterDevice captureFileWriter = new SharpPcap.LibPcap.CaptureFileWriterDevice((SharpPcap.LibPcap.LibPcapLiveDevice)this.device, capFile);
                     int count = this.packets.Count;
                     foreach (packet i in this.packets)
                     {
                         captureFileWriter.Write(i.pPacket);
                     }
+                    this.device.Close();
                     this.is_saved = true;
                     MessageBox.Show("保存完毕");
                 }

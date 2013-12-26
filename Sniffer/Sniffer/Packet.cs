@@ -88,11 +88,7 @@ namespace Sniffer
                 this.srcIp = ethernetPacket.SourceHwAddress.ToString();
                 this.destIp = ethernetPacket.DestinationHwAddress.ToString();
                 this.protocol = ethernetPacket.Type.ToString().ToUpper();
-                //ICMPv6存在bug
-                if (ethernetPacket.Type.ToString() != "IpV6")
-                {
-                    this.info = ethernetPacket.ToString();
-                }
+                this.info = "Ethernet II";
                 if (ethernetPacket.Type.ToString() == "IpV4" || ethernetPacket.Type.ToString() == "IpV6")
                 {
                     //IP包解析
@@ -151,6 +147,8 @@ namespace Sniffer
                                 this.igmp_info.Add("Checksum(校验和)", "0x" + Convert.ToString(igmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
                                 this.igmp_info.Add("GroupAddress(组地址)", igmpPacket.GroupAddress.ToString());
 
+                                //颜色
+                                this.color = "BlanchedAlmond";
                                 //简易信息
                                 this.info = this.igmp_info["Type(类型)"] + " " + this.igmp_info["GroupAddress(组地址)"];
                             }
@@ -188,10 +186,9 @@ namespace Sniffer
                             {
                                 this.info = ipPacket.ToString();
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
-                                this.info = "IPV6 to be continued";
-                                Console.WriteLine(e.Message);
+                                this.info = "IPV6";
                             }
                             
                             if (ipPacket.Protocol.ToString() == "ICMPV6")
@@ -207,9 +204,22 @@ namespace Sniffer
                                 }
                                 catch (Exception e)
                                 {
-                                    this.icmp_info.Add("Type(类型)", type);
-                                    this.info = type;
-                                    Console.WriteLine(e.Message);
+                                    if (type == "136")
+                                    {
+                                        type = "Neighbor Advertisement";
+                                        this.icmp_info.Add("Type(类型)", type);
+                                        this.info = type;
+                                    }
+                                    else if (type == "134")
+                                    {
+                                        type = "Router Advertisement";
+                                        this.icmp_info.Add("Type(类型)", type);
+                                        this.info = type;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine(e.Message);
+                                    }
                                 }
                                 
                                 this.icmp_info.Add("Code(代码)", "0x" + Convert.ToString(icmpPacket.Checksum, 16).ToUpper().PadLeft(4, '0'));
