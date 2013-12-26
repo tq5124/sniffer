@@ -394,6 +394,29 @@ namespace Sniffer
 
                 this.info = "FTP DATA: " + tcpPacket.PayloadData.Length.ToString() + " bytes";
             }
+            //SSL,只解析头部,不保证正确
+            else if (tcp_info["SourcePort(源端口)"] == "443" || tcp_info["DestinationPort(目的端口)"] == "443")
+            {
+                try
+                {
+                    SSL sslPacket = new SSL(tcpPacket.PayloadData, this.info);
+                    if (sslPacket.application_info.Count > 1)
+                    {
+                        this.application_info = sslPacket.application_info;
+                    }
+                    else if (sslPacket.application_info.Count == 1)
+                    {
+                        this.tcp_info.Add("TCP segment data", sslPacket.application_info["Data"]);  
+                    }
+                    this.info = sslPacket.info;
+                    this.protocol = sslPacket.protocol;
+                    this.color = "LightSteelBlue";
+                }
+                catch
+                {
+                    ;
+                }
+            }
         }
         /// <summary>
         /// HTTP解析
