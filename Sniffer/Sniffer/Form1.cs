@@ -45,14 +45,6 @@ namespace Sniffer
                     return;
                 }
             }
-            try
-            {
-                this.device.StopCapture();
-            }
-            catch
-            {
-                ;
-            }
             //设置保存标志位
             this.is_saved = false;
             this.button1.Enabled = false;
@@ -117,8 +109,7 @@ namespace Sniffer
         /// 抓包线程
         /// </summary>
         private void threadHandler()
-        {
-            this.device.Close();
+        {            
             this.device.Open(DeviceMode.Promiscuous, this.readTimeoutMilliseconds);
             this.device.Filter = this.filter;
             //this.device. = CaptureMode.Packets; //抓数据包
@@ -191,6 +182,7 @@ namespace Sniffer
             try
             {
                 this.device.StopCapture();
+                this.device.Close();
             }
             catch (Exception)
             {
@@ -583,6 +575,7 @@ namespace Sniffer
                     try
                     {
                         this.device.StopCapture();
+                        this.device.Close();
                     }
                     catch (Exception)
                     {
@@ -595,6 +588,7 @@ namespace Sniffer
                 try
                 {
                     this.device.StopCapture();
+                    this.device.Close();
                 }
                 catch (Exception)
                 {
@@ -642,6 +636,7 @@ namespace Sniffer
                 try
                 {
                     this.device.StopCapture();
+                    this.device.Close();
                 }
                 catch (Exception)
                 {
