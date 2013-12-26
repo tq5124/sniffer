@@ -23,6 +23,7 @@ namespace Sniffer
             this.is_saved = true;
             this.button2.Enabled = false;
             this.button8.Enabled = false;
+            this.filter = "";
         }
 
         //抓包线程
@@ -64,8 +65,6 @@ namespace Sniffer
             this.device = devices[eth];
 
             this.readTimeoutMilliseconds = 1000;
-            this.filter = "";
-            //this.filter = "ip and tcp";
 
             Thread newThread = new Thread(new ThreadStart(threadHandler));
             newThread.Start();
@@ -679,22 +678,25 @@ namespace Sniffer
                             packet temp = new packet(pPacket);
                             this.packets.Add(temp);
 
-                            if (this.dataGridView1.InvokeRequired)
+                            if (filter_check(temp))
                             {
-                                this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
-                            }
-                            else
-                            {
-                                int index = this.dataGridView1.Rows.Add();
-                                this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
-                                this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
-                                this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
-                                this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
-                                this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
-                                this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
-                                this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
+                                if (this.dataGridView1.InvokeRequired)
+                                {
+                                    this.dataGridView1.BeginInvoke(new setDataGridViewDelegate(setDataGridView), new object[] { temp, this.packets.Count - 1 });
+                                }
+                                else
+                                {
+                                    int index = this.dataGridView1.Rows.Add();
+                                    this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.FromName(temp.color);
+                                    this.dataGridView1.Rows[index].Cells[0].Value = temp.time;
+                                    this.dataGridView1.Rows[index].Cells[1].Value = temp.srcIp;
+                                    this.dataGridView1.Rows[index].Cells[2].Value = temp.destIp;
+                                    this.dataGridView1.Rows[index].Cells[3].Value = temp.protocol;
+                                    this.dataGridView1.Rows[index].Cells[4].Value = temp.info;
+                                    this.dataGridView1.Rows[index].Cells[5].Value = packets.Count - 1;
 
-                                this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
+                                    this.dataGridView1.FirstDisplayedScrollingRowIndex = this.dataGridView1.Rows.Count - 1;
+                                }
                             }
                         }
                         catch (Exception)
