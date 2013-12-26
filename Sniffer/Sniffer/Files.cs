@@ -54,8 +54,8 @@ namespace Sniffer
                 this.request_type = "UNKNOWN";
             }
             this.packet_header = this.find_header(packets, index, pck.tcp_info["AcknowledgmentNumber(确认序号)"]);
-            this.charset = this.find_charset();
-            this.encoding = this.find_encoding();
+            this.charset = this.protocol=="HTTP" ? this.find_charset() : "";
+            this.encoding = this.protocol == "HTTP" ? this.find_encoding() : "";
             this.file_data = this.find_data(packets, index, this.packet_header.tcp_info["AcknowledgmentNumber(确认序号)"]);
             this.file_name = this.find_fileName(pck);
             this.file_type = this.file_name.LastIndexOf(".") > 0 ? this.file_name.Substring(this.file_name.LastIndexOf(".")+1) : "";
@@ -65,9 +65,16 @@ namespace Sniffer
             for (int i = index; i < packets.Count;i++ )
             {
                 packet temp = (packet)packets[i];
-                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == ack && temp.application_info.ContainsKey("Head"))
+                if (temp.tcp_info.Count > 0 && temp.tcp_info["SequenceNumber(序号)"] == ack)
                 {
-                    return temp;
+                    if (this.protocol == "HTTP" && temp.application_info.ContainsKey("Head"))
+                    {
+                        return temp;
+                    }
+                    else if (this.protocol == "FTP" && temp.info.IndexOf("Response: 150 Opening") == 0)
+                    {
+                        return temp;
+                    }
                 }
             }
             return null;
@@ -83,16 +90,31 @@ namespace Sniffer
                 if (temp.tcp_info.Count > 0 && temp.tcp_info["AcknowledgmentNumber(确认序号)"] == ack)
                 {
                     long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
-                    if (temp.tcp_info.ContainsKey("TCP segment data") && !text.ContainsKey(seq))
+                    switch (this.protocol)
                     {
-                        text.Add(seq, temp.application_byte);
-                        text_seq.Add(seq);
+                        case "HTTP":
+                            if (temp.tcp_info.ContainsKey("TCP segment data") && !text.ContainsKey(seq))
+                            {
+                                text.Add(seq, temp.application_byte);
+                                text_seq.Add(seq);
+                            }
+                            else if (temp.application_info.ContainsKey("Data") && temp.application_info["Data"] != "" && !text.ContainsKey(seq))
+                            {
+                                text.Add(seq, temp.application_byte);
+                                text_seq.Add(seq);
+                            }
+                            break;
+                        case "FTP":
+                            if (temp.protocol == "FTP-DATA")
+                            {
+                                text.Add(seq, temp.application_byte);
+                                text_seq.Add(seq);
+                            }
+                            break;
+                        default:
+                            break;
                     }
-                    else if (temp.application_info.ContainsKey("Data") && temp.application_info["Data"] != "" && !text.ContainsKey(seq))
-                    {
-                        text.Add(seq, temp.application_byte);
-                        text_seq.Add(seq);
-                    }
+                    
                 }
             }
             text_seq.Sort();
@@ -110,8 +132,16 @@ namespace Sniffer
         }
 
         private string find_fileName(packet pkt){
-            string fileName = pkt.info.Split(' ')[1];
-            return fileName.Substring(fileName.LastIndexOf("/") + 1);
+            if (this.protocol == "HTTP")
+            {
+                string fileName = pkt.info.Split(' ')[1];
+                return fileName.Substring(fileName.LastIndexOf("/") + 1);
+            }
+            else if (this.protocol == "FTP")
+            {
+                return pkt.info.Split(' ')[2];
+            }
+            return "";
         }
 
         private string find_charset()
