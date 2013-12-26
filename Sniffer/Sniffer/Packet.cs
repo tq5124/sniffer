@@ -400,7 +400,14 @@ namespace Sniffer
                 try
                 {
                     SSL sslPacket = new SSL(tcpPacket.PayloadData);
-                    this.application_info = sslPacket.application_info;
+                    if (sslPacket.application_info.Count > 1)
+                    {
+                        this.application_info = sslPacket.application_info;
+                    }
+                    else if (sslPacket.application_info.Count == 1)
+                    {
+                        this.tcp_info.Add("TCP segment data", sslPacket.application_info["Data"]);  
+                    }
                     this.info = sslPacket.info;
                     this.protocol = sslPacket.protocol;
                     this.color = "LightSteelBlue";

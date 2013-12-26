@@ -63,7 +63,13 @@ namespace Sniffer
                     {
                         this.protocol = "TCP";
                         this.info = "TCP segment of a reassembled PDU";
-                        break;
+                        data = "";
+                        foreach (byte i in sslData)
+                        {
+                            data += Convert.ToString(i, 16).ToUpper().PadLeft(2, '0');
+                        }
+                        this.application_info.Add("Data", data);
+                        return;
                     }
                 }
                 this.application_info.Add("ApplicationType", "SSL");
