@@ -36,7 +36,7 @@ namespace Sniffer
             packet pck = (packet)packets[index];
             this.packet_request = pck;
             this.protocol = pck.protocol;
-            // 现在只有http的两个模式，待完善
+            // 现在只有http的两个模式和ftp，待完善
             if (pck.info.IndexOf("GET") == 0)
             {
                 this.request_type = "GET";
@@ -45,11 +45,14 @@ namespace Sniffer
             {
                 this.request_type = "POST";
             }
+            else if (pck.info.IndexOf("Response: 150") == 0)
+            {
+                this.request_type = "FTP";
+            }
             else
             {
                 this.request_type = "UNKNOWN";
             }
-            this.packet_request = pck;
             this.packet_header = this.find_header(packets, index, pck.tcp_info["AcknowledgmentNumber(确认序号)"]);
             this.charset = this.find_charset();
             this.encoding = this.find_encoding();

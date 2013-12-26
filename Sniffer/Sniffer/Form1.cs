@@ -725,6 +725,14 @@ namespace Sniffer
                         this.restruct_get.Rows[i].Cells[2].Value = Packet.info;
                         this.files.Add(new Files());
                     }
+
+                    if (Packet.info.IndexOf("Response: 150") == 0)
+                    {
+                        int i = this.restruct_get.Rows.Add();
+                        this.restruct_get.Rows[i].Cells[0].Value = index;
+                        this.restruct_get.Rows[i].Cells[1].Value = Packet.tcp_info["SourcePort(源端口)"];
+                        this.restruct_get.Rows[i].Cells[2].Value = Packet.info;
+                    }
                 }
             }
             catch
