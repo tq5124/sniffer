@@ -705,6 +705,7 @@ namespace Sniffer
                         }                        
                     }
                     this.is_saved = true;
+                    captureFileReader.Close();
                     MessageBox.Show("读取完毕");
                 }
             }

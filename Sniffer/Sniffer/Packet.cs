@@ -32,7 +32,7 @@ namespace Sniffer
         public Dictionary<string, string> application_info;
         public byte[] application_byte;
 
-        public static int ftp_pasv_port = -1;
+        public static Dictionary<int, int> ftp_pasv_port = new Dictionary<int, int>();
 
         public packet(SharpPcap.RawCapture pPacket)
         {
@@ -362,12 +362,18 @@ namespace Sniffer
                     {
                         string temp_ftp_pasv_port = ftptext.Substring(ftptext.IndexOf('(') + 1, ftptext.IndexOf(')') - ftptext.IndexOf('(') - 1);
                         string[] temp = temp_ftp_pasv_port.Split(',');
-                        ftp_pasv_port = (int.Parse(temp[temp.Length - 2]) << 8) + int.Parse(temp[temp.Length - 1]);
+                        int pasv_port = (int.Parse(temp[temp.Length - 2]) << 8) + int.Parse(temp[temp.Length - 1]);
+                        ftp_pasv_port.Add(int.Parse(this.tcp_info["DestinationPort(目的端口)"]), pasv_port);
                     }
                     //传输结束标识
                     else if (ftptext.IndexOf("226") >= 0)
                     {
-                        ftp_pasv_port = -1;
+                        ftp_pasv_port.Remove(int.Parse(this.tcp_info["DestinationPort(目的端口)"]));
+                    }
+                    //传输开始标识，加入PASV端口号
+                    else if (ftptext.IndexOf("150 Opening") >= 0)
+                    {
+                        this.application_info.Add("PASV_PORT", ftp_pasv_port[int.Parse(this.tcp_info["DestinationPort(目的端口)"])].ToString());
                     }
                 }
                 else
@@ -377,7 +383,7 @@ namespace Sniffer
                 }
             }
             //FTP-DATA，待完善
-            else if ((tcp_info["SourcePort(源端口)"] == ftp_pasv_port.ToString() || tcp_info["SourcePort(源端口)"] == "20") && tcpPacket.PayloadData.Length > 0)
+            else if ((ftp_pasv_port.ContainsValue(int.Parse(tcp_info["SourcePort(源端口)"])) || tcp_info["SourcePort(源端口)"] == "20") && tcpPacket.PayloadData.Length > 0)
             {
                 this.protocol = "FTP-DATA";
                 this.color = "LightSteelBlue";
