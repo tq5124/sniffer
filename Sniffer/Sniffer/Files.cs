@@ -17,6 +17,7 @@ namespace Sniffer
         public packet packet_header;
         public string file_name;
         public byte[] file_data;
+        public string file_type;
         public string charset;
         public string encoding;
 
@@ -54,6 +55,7 @@ namespace Sniffer
             this.encoding = this.find_encoding();
             this.file_data = this.find_data(packets, index, this.packet_header.tcp_info["AcknowledgmentNumber(确认序号)"]);
             this.file_name = this.find_fileName(pck);
+            this.file_type = this.file_name.LastIndexOf(".") > 0 ? this.file_name.Substring(this.file_name.LastIndexOf(".")+1) : "";
         }
 
         private packet find_header(System.Collections.ArrayList packets, int index, string ack){
