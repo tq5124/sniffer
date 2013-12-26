@@ -399,7 +399,7 @@ namespace Sniffer
             {
                 try
                 {
-                    SSL sslPacket = new SSL(tcpPacket.PayloadData);
+                    SSL sslPacket = new SSL(tcpPacket.PayloadData, this.info);
                     if (sslPacket.application_info.Count > 1)
                     {
                         this.application_info = sslPacket.application_info;

@@ -15,13 +15,14 @@ namespace Sniffer
         /// <summary>
         /// 构造函数
         /// </summary>
-        public SSL(byte[] sslData)
+        public SSL(byte[] sslData, string info)
         {
 
             this.application_info = new Dictionary<string, string>();
             int offset = 0;
             string data = "";
-            this.info = "";
+            this.info = info;
+            this.protocol = "TCP";
             if (sslData.Length > 0)
             {
                 while (offset < sslData.Length)
