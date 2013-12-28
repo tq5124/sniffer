@@ -7,9 +7,13 @@ namespace Sniffer
 {
     class SSL
     {
+        //应用层协议解析信息
         public Dictionary<string, string> application_info;
+        //要显示的简易信息
         public string info;
+        //由于存在使用443端口却不是SSL协议的情况，protocol作为实际协议信息返回
         public string protocol;
+        //由于一个使用443端口的SSL协议包中会存在多条SSL信息，因此用来判断是否存在下一条
         public int length;
 
         /// <summary>

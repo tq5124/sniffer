@@ -7,31 +7,52 @@ namespace Sniffer
 {
     public class packet
     {
+        //显示的简易信息部分
+        //包到达时间戳
         public string time;
+        //源地址，可能是IP也可能是MAC地址
         public string srcIp;
+        //目标地址，可能是IP也可能是MAC地址
         public string destIp;
+        //最高层使用的协议
         public string protocol;
+        //简单的包内容信息
         public string info;
+        //包的显示颜色
         public string color;
 
+        //数据包详细信息
+        //原始抓到的数据
         public SharpPcap.RawCapture pPacket;
+        //包的层别
         public PacketDotNet.LinkLayers layer;
+        //基础数据包
         public PacketDotNet.Packet rPacket;        
-
+        //物理帧信息
         public Dictionary<string, string> frame_info;
+        //以太网层信息
         public Dictionary<string, string> ethernet_info;
 
+        //IP层信息
         public Dictionary<string, string> ip_info;
+        //ARP协议解析信息
         public Dictionary<string, string> arp_info;
 
+        //ICMP协议解析信息
         public Dictionary<string, string> icmp_info;
+        //IGMP协议解析信息
         public Dictionary<string, string> igmp_info;
+        //TCP协议解析信息
         public Dictionary<string, string> tcp_info;
+        //UDP协议解析信息
         public Dictionary<string, string> udp_info;
 
+        //应用层协议解析信息
         public Dictionary<string, string> application_info;
+        //应用层包含的比特流数据，方便进行文件重组
         public byte[] application_byte;
 
+        //当前开启的ftp被动模式端口，key为客户端开启的端口，value为服务端开启的端口，进行FTP-DATA协议判断时与FTP文件重组时使用
         public static Dictionary<int, int> ftp_pasv_port = new Dictionary<int, int>();
 
         public packet(SharpPcap.RawCapture pPacket)

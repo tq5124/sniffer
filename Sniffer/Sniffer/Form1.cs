@@ -26,12 +26,14 @@ namespace Sniffer
             this.filter = "";
         }
 
-        //抓包线程
+        //抓包线程，同时负责更新包的显示
         private delegate void setDataGridViewDelegate(packet Packet, int index);
+        //包过滤检查线程
         private delegate bool filterCheckDelegate(packet Packet);
-
+        //当前抓包的网卡
         private ICaptureDevice device;
         private int readTimeoutMilliseconds;
+        //过滤规则
         private string filter;
         //抓到的所有包的所有信息
         private ArrayList packets;

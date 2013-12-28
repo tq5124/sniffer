@@ -7,7 +7,9 @@ namespace Sniffer
 {
     class DNS
     {
+        //应用层协议解析信息
         public Dictionary<string, string> application_info;
+        //要显示的简易信息
         public string info;
 
         /// <summary>
