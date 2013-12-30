@@ -173,37 +173,45 @@ namespace Sniffer
 
         private byte[] gzip_decoding(byte[] data)
         {
-            int head_num=0;
-            while (true)
+            try
             {
-                if (data[head_num] == 0x1f && data[head_num + 1] == 0x8b)
-                    break;
-                head_num++;
-            }
-            byte[] szSource = new byte[data.Length - head_num];
-            Array.Copy(data, head_num, szSource, 0, szSource.Length);
-            MemoryStream msSource = new MemoryStream(szSource);
-            //DeflateStream  也可以这儿
-            GZipStream stream = new GZipStream(msSource, CompressionMode.Decompress);
-            byte[] szTotal = new byte[40 * 1024];
-            long lTotal = 0;
-            byte[] buffer = new byte[8];
-            int iCount = 0;
-            do
-            {
-                iCount = stream.Read(buffer, 0, 8);
-                if (szTotal.Length <= lTotal + iCount) //放大数组
+                int head_num = 0;
+                while (true)
                 {
-                    byte[] temp = new byte[szTotal.Length * 10];
-                    szTotal.CopyTo(temp, 0);
-                    szTotal = temp;
+                    if (data[head_num] == 0x1f && data[head_num + 1] == 0x8b)
+                        break;
+                    head_num++;
                 }
-                buffer.CopyTo(szTotal, lTotal);
-                lTotal += iCount;
-            } while (iCount != 0);
-            byte[] szDest = new byte[lTotal];
-            Array.Copy(szTotal, 0, szDest, 0, lTotal);
-            return szDest;
+                byte[] szSource = new byte[data.Length - head_num];
+                Array.Copy(data, head_num, szSource, 0, szSource.Length);
+                MemoryStream msSource = new MemoryStream(szSource);
+                //DeflateStream  也可以这儿
+                GZipStream stream = new GZipStream(msSource, CompressionMode.Decompress);
+                byte[] szTotal = new byte[40 * 1024];
+                long lTotal = 0;
+                byte[] buffer = new byte[8];
+                int iCount = 0;
+                do
+                {
+                    iCount = stream.Read(buffer, 0, 8);
+                    if (szTotal.Length <= lTotal + iCount) //放大数组
+                    {
+                        byte[] temp = new byte[szTotal.Length * 10];
+                        szTotal.CopyTo(temp, 0);
+                        szTotal = temp;
+                    }
+                    buffer.CopyTo(szTotal, lTotal);
+                    lTotal += iCount;
+                } while (iCount != 0);
+                byte[] szDest = new byte[lTotal];
+                Array.Copy(szTotal, 0, szDest, 0, lTotal);
+                return szDest;
+            }
+            catch
+            {
+                return new byte[0];
+            }
+            
         }
     }
 }

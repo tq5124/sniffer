@@ -850,8 +850,13 @@ namespace Sniffer
             {
                 this.restruct_btn_get_Click(null, null);
             }
-            if (e.KeyValue < 48 || e.KeyValue > 122 || this.search_keyword.Text == "")
+            if (e == null || (e.KeyValue > 0 && e.KeyValue < 32) || (e.KeyValue == 127))
             {
+                return;
+            }
+            if (this.search_keyword.Text == "")
+            {
+                this.search_display.Text = "请输入要查找的关键字";
                 return;
             }
 
