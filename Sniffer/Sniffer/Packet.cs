@@ -384,7 +384,14 @@ namespace Sniffer
                         string temp_ftp_pasv_port = ftptext.Substring(ftptext.IndexOf('(') + 1, ftptext.IndexOf(')') - ftptext.IndexOf('(') - 1);
                         string[] temp = temp_ftp_pasv_port.Split(',');
                         int pasv_port = (int.Parse(temp[temp.Length - 2]) << 8) + int.Parse(temp[temp.Length - 1]);
-                        ftp_pasv_port.Add(int.Parse(this.tcp_info["DestinationPort(目的端口)"]), pasv_port);
+                        try
+                        {
+                            ftp_pasv_port.Add(int.Parse(this.tcp_info["DestinationPort(目的端口)"]), pasv_port);
+                        }
+                        catch (Exception)
+                        {
+                            //重复包会造成键值重复
+                        }
                     }
                     //传输结束标识
                     else if (ftptext.IndexOf("226") >= 0)
