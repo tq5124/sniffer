@@ -144,16 +144,31 @@ namespace Sniffer
 
         private string find_charset()
         {
-            string head = this.packet_header.application_info["Head"];
-            Regex search_charset = new Regex(@"(?<=charset=)[a-z0-9-]+\b");
-            return search_charset.Match(head).Value;
+            try
+            {
+                string head = this.packet_header.application_info["Head"];
+                Regex search_charset = new Regex(@"(?<=charset=)[a-z0-9-]+\b");
+                return search_charset.Match(head).Value;
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         private string find_encoding()
         {
-            string head = this.packet_header.application_info["Head"];
-            Regex search_charset = new Regex(@"(?<=Content-Encoding: )[a-z0-9-]+\b");
-            return search_charset.Match(head).Value;
+            try
+            {
+                string head = this.packet_header.application_info["Head"];
+                Regex search_charset = new Regex(@"(?<=Content-Encoding: )[a-z0-9-]+\b");
+                return search_charset.Match(head).Value;
+            }
+            catch
+            {
+                return "";
+            }
+            
         }
 
         private byte[] gzip_decoding(byte[] data)

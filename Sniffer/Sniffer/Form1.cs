@@ -61,6 +61,7 @@ namespace Sniffer
             this.files = new ArrayList();
             this.dataGridView1.Rows.Clear();
             this.restruct_get.Rows.Clear();
+            this.search_keyword.Text = "";
             //读取要监听的网卡
             int eth = System.Int32.Parse(this.comboBox1.SelectedValue.ToString());
             var devices = CaptureDeviceList.Instance;
@@ -781,7 +782,18 @@ namespace Sniffer
                     this.restruct_display.Text = "不支持显示图片，请保存后打开";
                     break;
                 default:
-                    this.restruct_display.Text = System.Text.Encoding.Default.GetString(file.file_data);
+                    try
+                    {
+                        if (file.charset != "")
+                            this.restruct_display.Text = System.Text.Encoding.GetEncoding(file.charset.ToUpper()).GetString(file.file_data);
+                        else
+                            this.restruct_display.Text = System.Text.Encoding.UTF8.GetString(file.file_data);
+                    }
+                    catch
+                    {
+                        this.restruct_display.Text = System.Text.Encoding.Default.GetString(file.file_data);
+                    }
+                    
                     break;
             }
             this.restruct_display.Tag = e.RowIndex;
@@ -833,16 +845,21 @@ namespace Sniffer
 
         private void search_keyword_KeyUp(object sender, KeyEventArgs e)
         {
+            // 异常处理
             if (this.files == null)
             {
                 this.restruct_btn_get_Click(null, null);
+            }
+            if (e.KeyValue < 48 || e.KeyValue > 122 || this.search_keyword.Text == "")
+            {
+                return;
             }
 
             // 如果有还没重组的文件，先重组
             for (int i = 0; i < this.files.Count; i++)
             {
                 Files temp = (Files)this.files[i];
-                if (temp.protocol == "")
+                if (temp.packet_request == null)
                 {
                     int getIndex = int.Parse(this.restruct_get.Rows[i].Cells[0].Value.ToString());
                     temp.update(this.packets, getIndex);
@@ -860,7 +877,18 @@ namespace Sniffer
             for (int i = 0; i < this.files.Count; i++)
             {
                 Files temp = (Files)this.files[i];
-                string text = System.Text.Encoding.Default.GetString(temp.file_data);
+                string text;
+                try
+                {
+                    if (temp.charset != "")
+                        text = System.Text.Encoding.GetEncoding(temp.charset.ToUpper()).GetString(temp.file_data);
+                    else
+                        text = System.Text.Encoding.UTF8.GetString(temp.file_data);
+                }
+                catch
+                {
+                    text = System.Text.Encoding.Default.GetString(temp.file_data);
+                }
                 int index = -1;
                 if (ignoreUpper)
                     index = text.ToLower().IndexOf(search.ToLower());
