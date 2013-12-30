@@ -68,6 +68,12 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.display_text = new System.Windows.Forms.TextBox();
             this.display_title = new System.Windows.Forms.Label();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.search_display = new System.Windows.Forms.RichTextBox();
+            this.search_ignoreUpper = new System.Windows.Forms.CheckBox();
+            this.search_keyword = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tab_multi.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -75,6 +81,7 @@
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).BeginInit();
             this.tabPage2.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -237,6 +244,7 @@
             this.tab_multi.Controls.Add(this.tabPage1);
             this.tab_multi.Controls.Add(this.tabPage3);
             this.tab_multi.Controls.Add(this.tabPage2);
+            this.tab_multi.Controls.Add(this.tabPage4);
             this.tab_multi.Location = new System.Drawing.Point(717, 12);
             this.tab_multi.Name = "tab_multi";
             this.tab_multi.SelectedIndex = 0;
@@ -428,7 +436,7 @@
             this.restruct_btn_get.Name = "restruct_btn_get";
             this.restruct_btn_get.Size = new System.Drawing.Size(100, 23);
             this.restruct_btn_get.TabIndex = 2;
-            this.restruct_btn_get.Text = "过滤get包";
+            this.restruct_btn_get.Text = "过滤文件包";
             this.restruct_btn_get.UseVisualStyleBackColor = true;
             this.restruct_btn_get.Click += new System.EventHandler(this.restruct_btn_get_Click);
             // 
@@ -459,6 +467,55 @@
             this.display_title.Name = "display_title";
             this.display_title.Size = new System.Drawing.Size(0, 12);
             this.display_title.TabIndex = 0;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.search_display);
+            this.tabPage4.Controls.Add(this.search_ignoreUpper);
+            this.tabPage4.Controls.Add(this.search_keyword);
+            this.tabPage4.Controls.Add(this.label2);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(372, 416);
+            this.tabPage4.TabIndex = 4;
+            this.tabPage4.Text = "全局搜索";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // search_display
+            // 
+            this.search_display.Location = new System.Drawing.Point(6, 68);
+            this.search_display.Name = "search_display";
+            this.search_display.Size = new System.Drawing.Size(353, 336);
+            this.search_display.TabIndex = 3;
+            this.search_display.Text = "";
+            // 
+            // search_ignoreUpper
+            // 
+            this.search_ignoreUpper.AutoSize = true;
+            this.search_ignoreUpper.Location = new System.Drawing.Point(257, 33);
+            this.search_ignoreUpper.Name = "search_ignoreUpper";
+            this.search_ignoreUpper.Size = new System.Drawing.Size(84, 16);
+            this.search_ignoreUpper.TabIndex = 2;
+            this.search_ignoreUpper.Text = "忽略大小写";
+            this.search_ignoreUpper.UseVisualStyleBackColor = true;
+            this.search_ignoreUpper.CheckedChanged += new System.EventHandler(this.search_ignoreUpper_CheckedChanged);
+            // 
+            // search_keyword
+            // 
+            this.search_keyword.Location = new System.Drawing.Point(6, 33);
+            this.search_keyword.Name = "search_keyword";
+            this.search_keyword.Size = new System.Drawing.Size(244, 21);
+            this.search_keyword.TabIndex = 1;
+            this.search_keyword.KeyUp += new System.Windows.Forms.KeyEventHandler(this.search_keyword_KeyUp);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(4, 10);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(197, 12);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "输入要搜索的关键字，回车开始搜索";
             // 
             // Form1
             // 
@@ -492,6 +549,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.restruct_get)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -539,6 +598,12 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TextBox display_text;
         private System.Windows.Forms.Label display_title;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.RichTextBox search_display;
+        private System.Windows.Forms.CheckBox search_ignoreUpper;
+        private System.Windows.Forms.TextBox search_keyword;
+        private System.Windows.Forms.Label label2;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 

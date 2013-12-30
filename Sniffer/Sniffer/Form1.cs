@@ -10,6 +10,7 @@ using System.Collections;
 using SharpPcap;
 using System.Threading;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Sniffer
 {
@@ -26,14 +27,12 @@ namespace Sniffer
             this.filter = "";
         }
 
-        //抓包线程，同时负责更新包的显示
+        //抓包线程
         private delegate void setDataGridViewDelegate(packet Packet, int index);
-        //包过滤检查线程
         private delegate bool filterCheckDelegate(packet Packet);
-        //当前抓包的网卡
+
         private ICaptureDevice device;
         private int readTimeoutMilliseconds;
-        //过滤规则
         private string filter;
         //抓到的所有包的所有信息
         private ArrayList packets;
@@ -61,6 +60,7 @@ namespace Sniffer
             this.packets = new ArrayList();
             this.files = new ArrayList();
             this.dataGridView1.Rows.Clear();
+            this.restruct_get.Rows.Clear();
             //读取要监听的网卡
             int eth = System.Int32.Parse(this.comboBox1.SelectedValue.ToString());
             var devices = CaptureDeviceList.Instance;
@@ -763,12 +763,13 @@ namespace Sniffer
             string port = this.restruct_get.Rows[e.RowIndex].Cells[1].Value.ToString();
             filter_apply_newRule("port", "==", port);
 
-            // 如果没有建立files对象则update
-            if (this.files[e.RowIndex] != null)
+            // 如果files对象还没有内容则update
+            Files temp = (Files)this.files[e.RowIndex];
+            if (temp.protocol == "")
             {
-                Files temp = (Files)this.files[e.RowIndex];
                 int getIndex = int.Parse(this.restruct_get.Rows[e.RowIndex].Cells[0].Value.ToString());
                 temp.update(this.packets, getIndex);
+                this.files[e.RowIndex] = temp;
             }
 
             // 写入textbox
@@ -823,6 +824,91 @@ namespace Sniffer
             {
                 return;
             }
+        }
+
+        private void search_ignoreUpper_CheckedChanged(object sender, EventArgs e)
+        {
+            this.search_keyword_KeyUp(null, null);
+        }
+
+        private void search_keyword_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (this.files == null)
+            {
+                this.restruct_btn_get_Click(null, null);
+            }
+
+            // 如果有还没重组的文件，先重组
+            for (int i = 0; i < this.files.Count; i++)
+            {
+                Files temp = (Files)this.files[i];
+                if (temp.protocol == "")
+                {
+                    int getIndex = int.Parse(this.restruct_get.Rows[i].Cells[0].Value.ToString());
+                    temp.update(this.packets, getIndex);
+                    this.files[i] = temp;
+                }
+            }
+
+            // 搜索关键字
+            string search = this.search_keyword.Text;
+            bool ignoreUpper = this.search_ignoreUpper.Checked;
+            int num = 0;
+
+            this.search_display.Text = "";
+            this.search_display.Text += "关键字: " + search + "\r\n" + "====================" + "\r\n\r\n";
+            for (int i = 0; i < this.files.Count; i++)
+            {
+                Files temp = (Files)this.files[i];
+                string text = System.Text.Encoding.Default.GetString(temp.file_data);
+                int index = -1;
+                if (ignoreUpper)
+                    index = text.ToLower().IndexOf(search.ToLower());
+                else
+                    index = text.IndexOf(search);
+
+                if (index >= 0)
+                {
+                    this.search_display.Text += "File: " + temp.file_name + "\r\n";
+                    this.search_display.Text += "From: " + temp.packet_request.info + "\r\n";
+                    this.search_display.Text += "Find: " + "\r\n";
+                    if (index > 20 && (text.Length - index - search.Length) > 20)
+                    {
+                        this.search_display.Text += "..." + text.Substring(index - 19, 19 * 2 + search.Length) + "...";
+                    }
+                    else if (index > 20)
+                    {
+                        this.search_display.Text += "..." + text.Substring(index - 19);
+                    }
+                    else if ((text.Length - index - search.Length) > 20)
+                    {
+                        this.search_display.Text += text.Substring(0, search.Length + 19) + "...";
+                    }
+                    else
+                    {
+                        this.search_display.Text += text;
+                    }
+                    this.search_display.Text += "\r\n\r\n";
+                    num++;
+                }
+            }
+            this.search_display.Text += "共找到" + num.ToString() + "处";
+
+            // 高亮关键字
+            string displayText = ignoreUpper ? this.search_display.Text.ToLower() : this.search_display.Text;
+            search = ignoreUpper ? search.ToLower() : search;
+            int j = find_keyword(displayText, search, 0);
+            while ( j > 0)
+            {
+                this.search_display.Select(j, search.Length);
+                this.search_display.SelectionColor = Color.Blue;
+                j = find_keyword(displayText, search,j);
+            }
+        }
+
+        private int find_keyword(string text, string key, int offset)
+        {
+            return text.IndexOf(key,offset+1);
         }
     }
 }
