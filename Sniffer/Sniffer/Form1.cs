@@ -776,13 +776,12 @@ namespace Sniffer
             // 写入textbox
             Files file = (Files)this.files[e.RowIndex];
             switch (file.file_type){
-                case "jpg":
-                case "png":
-                case "gif":
-                    this.restruct_display.Text = "不支持显示图片，请保存后打开";
-                    break;
-                default:
-                    /*
+                case "html":
+                case "htm":
+                case "css":
+                case "js":
+                case "php":
+                case "txt":
                     try
                     {
                         if (file.charset != "")
@@ -794,7 +793,9 @@ namespace Sniffer
                     {
                         this.restruct_display.Text = System.Text.Encoding.UTF8.GetString(file.file_data);
                     }
-                    */
+                    break;
+                default:
+                    this.restruct_display.Text = "不支持显示该类型的文件，请保存后打开";
                     break;
             }
             this.restruct_display.Tag = e.RowIndex;
