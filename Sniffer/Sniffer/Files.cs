@@ -33,32 +33,40 @@ namespace Sniffer
         
         public void update(System.Collections.ArrayList packets, int index)
         {
-            packet pck = (packet)packets[index];
-            this.packet_request = pck;
-            this.protocol = pck.protocol;
-            // 现在只有http的两个模式和ftp，待完善
-            if (pck.info.IndexOf("GET") == 0)
+            try
             {
-                this.request_type = "GET";
+                packet pck = (packet)packets[index];
+                this.packet_request = pck;
+                this.protocol = pck.protocol;
+                // 现在只有http的两个模式和ftp，待完善
+                if (pck.info.IndexOf("GET") == 0)
+                {
+                    this.request_type = "GET";
+                }
+                else if (pck.info.IndexOf("POST") == 0)
+                {
+                    this.request_type = "POST";
+                }
+                else if (pck.info.IndexOf("Response: 150") == 0)
+                {
+                    this.request_type = "FTP";
+                }
+                else
+                {
+                    this.request_type = "UNKNOWN";
+                }
+                this.packet_header = this.find_header(packets, index, pck.tcp_info["AcknowledgmentNumber(确认序号)"]);
+                this.charset = this.protocol == "HTTP" ? this.find_charset() : "";
+                this.encoding = this.protocol == "HTTP" ? this.find_encoding() : "";
+                this.file_data = this.find_data(packets, index, this.packet_header.tcp_info["AcknowledgmentNumber(确认序号)"]);
+                this.file_name = this.find_fileName(pck);
+                this.file_type = this.file_name.LastIndexOf(".") > 0 ? this.file_name.Substring(this.file_name.LastIndexOf(".") + 1) : "";
             }
-            else if (pck.info.IndexOf("POST") == 0)
+            catch
             {
-                this.request_type = "POST";
+                return;
             }
-            else if (pck.info.IndexOf("Response: 150") == 0)
-            {
-                this.request_type = "FTP";
-            }
-            else
-            {
-                this.request_type = "UNKNOWN";
-            }
-            this.packet_header = this.find_header(packets, index, pck.tcp_info["AcknowledgmentNumber(确认序号)"]);
-            this.charset = this.protocol=="HTTP" ? this.find_charset() : "";
-            this.encoding = this.protocol == "HTTP" ? this.find_encoding() : "";
-            this.file_data = this.find_data(packets, index, this.packet_header.tcp_info["AcknowledgmentNumber(确认序号)"]);
-            this.file_name = this.find_fileName(pck);
-            this.file_type = this.file_name.LastIndexOf(".") > 0 ? this.file_name.Substring(this.file_name.LastIndexOf(".")+1) : "";
+            
         }
 
         private packet find_header(System.Collections.ArrayList packets, int index, string ack){

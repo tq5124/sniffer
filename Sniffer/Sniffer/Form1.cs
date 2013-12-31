@@ -791,7 +791,7 @@ namespace Sniffer
                     }
                     catch
                     {
-                        this.restruct_display.Text = System.Text.Encoding.Default.GetString(file.file_data);
+                        this.restruct_display.Text = System.Text.Encoding.UTF8.GetString(file.file_data);
                     }
                     
                     break;
@@ -892,7 +892,15 @@ namespace Sniffer
                 }
                 catch
                 {
-                    text = System.Text.Encoding.Default.GetString(temp.file_data);
+                    if (temp.file_data != null)
+                    {
+                        text = System.Text.Encoding.Default.GetString(temp.file_data);
+                    }
+                    else
+                    {
+                        text = "";
+                    }
+                    
                 }
                 int index = -1;
                 if (ignoreUpper)
@@ -923,6 +931,11 @@ namespace Sniffer
                     }
                     this.search_display.Text += "\r\n\r\n";
                     num++;
+                    if (num > 20)
+                    {
+                        this.search_display.Text += "由于结果太多，剩下的结果不显示。请继续添加关键字";
+                        break;
+                    }
                 }
             }
             this.search_display.Text += "共找到" + num.ToString() + "处";
