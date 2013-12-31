@@ -103,13 +103,27 @@ namespace Sniffer
                             long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
                             if (temp.tcp_info.ContainsKey("TCP segment data") && !text.ContainsKey(seq))
                             {
-                                text.Add(seq, temp.application_byte);
-                                text_seq.Add(seq);
+                                try
+                                {
+                                    text.Add(seq, temp.application_byte);
+                                    text_seq.Add(seq);
+                                }
+                                catch (Exception)
+                                { 
+                                    //重发包会造成text.Add的时候throw键值重复问题
+                                }
                             }
                             else if (temp.application_info.ContainsKey("Data") && temp.application_info["Data"] != "" && !text.ContainsKey(seq))
                             {
-                                text.Add(seq, temp.application_byte);
-                                text_seq.Add(seq);
+                                try
+                                {
+                                    text.Add(seq, temp.application_byte);
+                                    text_seq.Add(seq);
+                                }
+                                catch (Exception)
+                                {
+                                    //重发包会造成text.Add的时候throw键值重复问题
+                                }
                             }
                         }
                         break;
@@ -117,8 +131,15 @@ namespace Sniffer
                         if (temp.protocol == "FTP-DATA" && temp.tcp_info["SourcePort(源端口)"] == this.packet_header.application_info["PASV_PORT"])
                         {
                             long seq = Convert.ToInt64(temp.tcp_info["SequenceNumber(序号)"]);
-                            text.Add(seq, temp.application_byte);
-                            text_seq.Add(seq);
+                            try
+                            {
+                                text.Add(seq, temp.application_byte);
+                                text_seq.Add(seq);
+                            }
+                            catch (Exception)
+                            {
+                                //重发包会造成text.Add的时候throw键值重复问题
+                            }
                         }
                         break;
                 }
