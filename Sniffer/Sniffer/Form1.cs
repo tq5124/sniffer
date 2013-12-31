@@ -782,6 +782,7 @@ namespace Sniffer
                     this.restruct_display.Text = "不支持显示图片，请保存后打开";
                     break;
                 default:
+                    /*
                     try
                     {
                         if (file.charset != "")
@@ -793,7 +794,7 @@ namespace Sniffer
                     {
                         this.restruct_display.Text = System.Text.Encoding.UTF8.GetString(file.file_data);
                     }
-                    
+                    */
                     break;
             }
             this.restruct_display.Tag = e.RowIndex;
